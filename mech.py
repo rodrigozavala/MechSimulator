@@ -129,10 +129,12 @@ while True:
     link1.updatepFWithTheta(angles[i]["theta"])
     pygame.draw.line(screen,RED,link1.p0.p,link1.pf.p,5)
     link2.setP0(link1.pf)
-    #link2.updatepFWithTheta(solutions[i][0])
+    link2.updatepFWithTheta(solutions[i][0])
     pygame.draw.line(screen,BLACK,link2.p0.p,link2.pf.p,5)
-    link3.updatepFWithTheta(solutions[i][1])
-    #link3.setP0(link2.pf)
+    link3.setP0(link2.pf)
+    link3.updatep0WithTheta(math.pi+solutions[i][1])
+    #link3.setPf(link4Ground.p0)
+    #
     pygame.draw.line(screen,GREEN,link3.p0.p,link3.pf.p,5)
     
     #link4Ground.setP0(link3.pf)
