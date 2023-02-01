@@ -107,6 +107,17 @@ class Point:
         self.p=np.array([x,y])
         self.x,self.y=x,y
 
+
+    def setX(self,x):
+        self.x=x
+        self.p[0]=x
+
+    def setY(self,y):
+        self.y=y
+        self.p[1]=y
+
+
+
     @staticmethod
     def computeEuclideanDistance(p1,p2):
         return np.linalg.norm(p2.p-p1.p)
@@ -134,6 +145,8 @@ class Point:
     def computeAngleDegrees(p1,p2):
         return math.degrees(Point.computeAngleRadians(p1,p2))
 
+
+    
 
 
 

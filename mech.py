@@ -3,7 +3,7 @@ import numpy as np
 import sympy as sym
 import math
 import matplotlib.pyplot as plt
-from links import SimpleLink
+from links import SimpleLink, Point
 from links import Mechanism
 
 #Defining variables
@@ -85,36 +85,61 @@ BROWN=(107, 79, 32)
 LIGHT_BRONW=(140, 111, 62)
 
 
-#plt.plot(angles[0:]["theta"],solutions[:][0])
-#plt.plot(angles[0:]["theta"],solutions[:][1])
-x=np.linspace(0,200,len(solutions))
-print("Hola otra vez Dios",x)
-print(type(solutions[:]),solutions[:])
-print(type(solutions[:][0]),solutions[:][0])
-print("Adios")
-plt.plot(x,np.array(solutions)[:,0])
-plt.plot(x,np.array(solutions)[:,1])
-plt.show()
-
 pygame.init()
 size=(800,500)
 screen=pygame.display.set_mode(size)
 
 i=0
 firstTime=True
+
+hasClicked= False
+
+firstPoint=Point(0,0)
+lastPoint=Point(0,0)
+
+mousePos=Point(0,0)
+
+defFont=pygame.font.get_default_font()
+fontSize=10
+font=pygame.font.Font(defFont,fontSize)
 while True:
     for event in pygame.event.get():
         print(event)
+        if("pos" in event.__dict__.keys()):
+            #print(event.__dict__["pos"][0])
+            mousePos.setX(event.__dict__["pos"][0])
+            mousePos.setY(event.__dict__["pos"][1])
+            #print(mousePos.p[0],mousePos.p[1])
         if(event.type==pygame.QUIT):
             sys.exit()
             break;
+        
+        elif (event.type == pygame.MOUSEBUTTONDOWN):
+            if(hasClicked):
+                lastPoint.setX(mousePos.p[0])
+                lastPoint.setY(mousePos.p[1])
+                hasClicked=False
+                
+            elif (not hasClicked):
+                firstPoint.setX(mousePos.p[0])
+                firstPoint.setY(mousePos.p[1])
+                hasClicked=True
 
-    
-    #to fill screen background color
+
+    #To fill screen background color
     screen.fill(LIGHT_GRAY)
+
+    #This must be done if a link is being created
+    if (hasClicked):
+        distanceBetweenPoints=Point.computeEuclideanDistance(firstPoint,mousePos)
+        pygame.draw.line(screen,BLACK,firstPoint.p,mousePos.p,1)
+        pygame.draw.circle(screen,BLACK,firstPoint.p,distanceBetweenPoints,1)
+        textToDisplay=str(distanceBetweenPoints)
+        textSurface=font.render(textToDisplay,True,BLACK)
+        screen.blit(textSurface,firstPoint.p+Point.computeMiddlePoint(mousePos,firstPoint).p)
+    
+    
     #update screen
-    #print("####jajaja")
-    #pygame.draw.line(screen,GREEN,u0,u1,5)
     pygame.draw.line(screen,RED,[0,0],[0,100],5)
     pygame.draw.line(screen,RED,[0,0],[100,0],5)
 
@@ -131,24 +156,19 @@ while True:
         
         firstTime=False
     
-    #link1.updatepFWithTheta(angles[i]["theta"])
+    #Mechanism animation
     th=math.pi*0.5
     link1.updateValues(link1.p0,angles[i]["theta"]+th)
     pygame.draw.line(screen,RED,link1.p0.p,link1.pf.p,5)
-    #link2.setP0(link1.pf)
-    #link2.updatepFWithTheta(solutions[i][0])
+
     link2.updateValues(link1.pf,solutions[i][0]+th)
     pygame.draw.line(screen,BLACK,link2.p0.p,link2.pf.p,5)
-    #link3.setP0(link2.pf)
-    #link3.updatep0WithTheta(math.pi+solutions[i][1])
-    #link3.setPf(link4Ground.p0)
-    #
+
     link3.updateValues(link2.pf,solutions[i][1]+th)
     pygame.draw.line(screen,GREEN,link3.p0.p,link3.pf.p,5)
     
     link4Ground.p0 = link3.pf
     link4Ground.pF = link1.p0
-    #link4Ground.setP0(link3.pf)
     pygame.draw.line(screen,BROWN,link4Ground.p0.p,link4Ground.pf.p,5)
 
     i+=1
