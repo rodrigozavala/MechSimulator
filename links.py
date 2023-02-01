@@ -27,6 +27,8 @@ class Mechanism:
 class SimpleLink:
     ##I don't have polymorphism here, but passing to other language must be easier than this
     def __init__(self,x0=None,y0=None,xf=None,yf=None,d=None,xm=None,ym=None,theta=None,grounded=False):
+        """Please always send x0, y0, xf, yf
+        """
         self.grounded=grounded
         if x0 !=None and y0!=None and xf!=None and yf!=None:
             self.p0=Point(x0,y0)
@@ -93,6 +95,12 @@ class SimpleLink:
     def updatep0WithTheta(self, theta):
         self.rotateRespectToPF(theta)
 
+    def updateValues(self,p0,theta):
+        self.p0 = p0
+        self.theta = theta
+        #self.pf=Point(self.p0.p[0]+self.d*math.cos(math.radians(self.theta)),self.p0.p[1]+self.d*math.sin(math.radians(self.theta)))
+        self.pf=Point(self.p0.p[0]+self.d*math.cos(self.theta),self.p0.p[1]+self.d*math.sin(self.theta))
+        self.pm=Point.computeMiddlePoint(self.p0,self.pf)
 
 class Point:
     def __init__(self,x,y):

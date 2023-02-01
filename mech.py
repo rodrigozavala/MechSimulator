@@ -2,6 +2,7 @@ import pygame, sys, time
 import numpy as np
 import sympy as sym
 import math
+import matplotlib.pyplot as plt
 from links import SimpleLink
 from links import Mechanism
 
@@ -84,17 +85,21 @@ BROWN=(107, 79, 32)
 LIGHT_BRONW=(140, 111, 62)
 
 
+#plt.plot(angles[0:]["theta"],solutions[:][0])
+#plt.plot(angles[0:]["theta"],solutions[:][1])
+x=np.linspace(0,200,len(solutions))
+print("Hola otra vez Dios",x)
+print(type(solutions[:]),solutions[:])
+print(type(solutions[:][0]),solutions[:][0])
+print("Adios")
+plt.plot(x,np.array(solutions)[:,0])
+plt.plot(x,np.array(solutions)[:,1])
+plt.show()
 
 pygame.init()
 size=(800,500)
 screen=pygame.display.set_mode(size)
-"""
-rotation=lambda t: np.array([[np.cos(t),-np.sin(t)],[np.sin(t),np.cos(t)]])
-rot=lambda u,t: np.transpose(np.matmul(rotation(t),np.array([[u[0]],[u[1]]])))
-rot_point=lambda u,t,p:rot(u-p,t)+p
-u0=np.array([0,100])
-u1=np.array([200,100])
-p=np.array([100,100])"""
+
 i=0
 firstTime=True
 while True:
@@ -114,8 +119,8 @@ while True:
     pygame.draw.line(screen,RED,[0,0],[100,0],5)
 
 
-    initx0=100
-    inity0=100
+    initx0=200
+    inity0=200
 
     sFactor=10
     if(firstTime):
@@ -126,17 +131,23 @@ while True:
         
         firstTime=False
     
-    link1.updatepFWithTheta(angles[i]["theta"])
+    #link1.updatepFWithTheta(angles[i]["theta"])
+    th=math.pi*0.5
+    link1.updateValues(link1.p0,angles[i]["theta"]+th)
     pygame.draw.line(screen,RED,link1.p0.p,link1.pf.p,5)
-    link2.setP0(link1.pf)
-    link2.updatepFWithTheta(solutions[i][0])
+    #link2.setP0(link1.pf)
+    #link2.updatepFWithTheta(solutions[i][0])
+    link2.updateValues(link1.pf,solutions[i][0]+th)
     pygame.draw.line(screen,BLACK,link2.p0.p,link2.pf.p,5)
-    link3.setP0(link2.pf)
-    link3.updatep0WithTheta(math.pi+solutions[i][1])
+    #link3.setP0(link2.pf)
+    #link3.updatep0WithTheta(math.pi+solutions[i][1])
     #link3.setPf(link4Ground.p0)
     #
+    link3.updateValues(link2.pf,solutions[i][1]+th)
     pygame.draw.line(screen,GREEN,link3.p0.p,link3.pf.p,5)
     
+    link4Ground.p0 = link3.pf
+    link4Ground.pF = link1.p0
     #link4Ground.setP0(link3.pf)
     pygame.draw.line(screen,BROWN,link4Ground.p0.p,link4Ground.pf.p,5)
 
