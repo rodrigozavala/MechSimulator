@@ -3,8 +3,7 @@ import numpy as np
 import sympy as sym
 import math
 import matplotlib.pyplot as plt
-from links import SimpleLink, Point
-from links import Mechanism
+from links import SimpleLink, Point, Mechanism
 
 #Defining variables
 t1,t2,t3,t4=sym.symbols("t_1 t_2 t_3 t_4")

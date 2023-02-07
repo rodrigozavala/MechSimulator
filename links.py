@@ -116,6 +116,11 @@ class Point:
         self.y=y
         self.p[1]=y
 
+    def getX(self):
+        return self.x
+        
+    def getY(self):
+        return self.y
 
 
     @staticmethod
@@ -144,10 +149,5 @@ class Point:
     @staticmethod
     def computeAngleDegrees(p1,p2):
         return math.degrees(Point.computeAngleRadians(p1,p2))
-
-
-    
-
-
 
         
