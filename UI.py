@@ -6,7 +6,7 @@ import math
 import matplotlib.pyplot as plt
 from links import Point,SimpleLink
 
-#Defining some colors
+#############################Defining some colors
 WHITE=(255,255,255)
 CYAN=(0, 251, 255)
 BLACK=(0,0,0)
@@ -28,20 +28,23 @@ ORANGE=(252, 161, 3)
 DARK_BROWN=(54, 39, 14)
 BROWN=(107, 79, 32)
 LIGHT_BRONW=(140, 111, 62)
-################################
+###############################################
 
 pygame.init()
 size=(1000,620)
 screen=pygame.display.set_mode(size)
-######################################
+##############################################
 
-### About link creation and Mouse use
-#### Related to different modes
+########################### About link creation and Mouse use
+############################# Related to different modes
 creationMode=False
-#About on click buttons events
+###################About on click buttons events
 i=0
 firstTime=True
 hasClicked= False
+
+clickTabOnce=False
+clickTabTwice=False
 
 LEFT=1
 RIGHT=3
@@ -50,13 +53,15 @@ lastPoint=Point(0,0)
 mousePos=Point(0,0)
 
 objectsInScreen=[]
-### About fonts
+########################### About fonts
 
 defFont=pygame.font.get_default_font()
 fontSize=10
-font=pygame.font.Font(defFont,fontSize)
+fontButtons=pygame.font.Font(defFont,fontSize)
 
-############# Related to GUI
+fontInput=pygame.font.Font(defFont,20)
+
+############################################ Related to GUI
 
 manager=pygame_gui.UIManager(size)
 
@@ -66,7 +71,8 @@ buttonCreateChar={
 "posX":0,
 "posY":size[1]-75
 }
-#Buttons
+
+##############################Buttons and Buttons characteristics
 buttonCreate = pygame_gui.elements.UIButton(relative_rect=pygame.Rect(
     (buttonCreateChar["posX"],buttonCreateChar["posY"]),(buttonCreateChar["bWidth"],buttonCreateChar["bHeight"])),
     text="Create New Link",manager=manager)
@@ -82,7 +88,17 @@ buttonSave = pygame_gui.elements.UIButton(relative_rect=pygame.Rect(
     (buttonSaveChar["posX"],buttonSaveChar["posY"]),(buttonSaveChar["bWidth"],buttonSaveChar["bHeight"])),
     text="Save",manager=manager)
 
+#####################Input text
+inputRectangle1Char = {
+    "bHeight":40,
+    "bWidth":150,
+    "posX":buttonSaveChar["posX"]+buttonSaveChar["bWidth"],
+    "posY":size[1]-75
+}
 
+inputRectangle1=pygame.Rect(inputRectangle1Char["posX"],inputRectangle1Char["posY"],inputRectangle1Char["bWidth"],inputRectangle1Char["bHeight"])
+
+angle_text=""
 
 clock=pygame.time.Clock()
 
@@ -99,10 +115,10 @@ while True:
             sys.exit()
             break;
         elif (event.type == pygame_gui.UI_BUTTON_PRESSED):
-            if(event.ui_element == buttonCreate):
+            if(event.ui_element == buttonCreate):##buttonCreate was pressed
                 ###set creation mode
                 creationMode=True
-        elif(creationMode):
+        elif(creationMode):##creationMode is set True
             if (event.type == pygame.MOUSEBUTTONDOWN and event.button == LEFT):
                 if(hasClicked):
                     lastPoint.setX(mousePos.p[0])
@@ -117,41 +133,81 @@ while True:
                     firstPoint.setY(mousePos.p[1])
                     hasClicked=True
 
-            elif(event.type == pygame.KEYDOWN):
-                if(event.key ==  pygame.K_TAB):
-                    print("Something Activated")
+            elif(event.type == pygame.KEYDOWN and hasClicked == True):
+                if (clickTabTwice==False and clickTabOnce==False):
+                    ##with clickTabTwice==False and clickTabOnce== True we change angle
+                    ##with clickTabTwice==True and clickTabOnce== True we change length
+                    if(event.key ==  pygame.K_TAB):
+                        clickTabOnce = True
+                        #https://www.geeksforgeeks.org/how-to-get-keyboard-input-in-pygame/
+                        #print("Something Activated")
+                elif (clickTabTwice==False and clickTabOnce== True):#01
+                    if(event.key == pygame.K_TAB):
+                        clickTabTwice = True
+                    elif(event.key == pygame.K_KP_ENTER):
+                        clickTabOnce=False
+                        clickTabTwice=False
+                        hasClicked=False
 
-        
+                elif(clickTabTwice == True and clickTabOnce == True):#11
+                    if(event.key == pygame.K_TAB):
+                        clickTabTwice = False
+                    elif(event.key == pygame.K_KP_ENTER):
+                        clickTabOnce=False
+                        clickTabTwice=False
+                        hasClicked=False
+
+
+
+
+
         manager.process_events(event)
 
 
     #To fill screen background color
     screen.fill(LIGHT_GRAY)
-
+    #To put UI on screen
     manager.update(time_delta)
 
     manager.draw_ui(screen)
+
+    pygame.draw.rect(screen, WHITE, inputRectangle1)
+
+
+    #Input text on screen
+    text_surface = fontInput.render("Hola", True, (0, 0, 0))
+    screen.blit(text_surface, (inputRectangle1.x+100, inputRectangle1.y+5))
+
+
     #Animation that must be done if a link is being created
-    if (hasClicked):
+    if (hasClicked and clickTabTwice==False and clickTabOnce==False):
         distanceBetweenPoints=Point.computeEuclideanDistance(firstPoint,mousePos)
         pygame.draw.line(screen,BLACK,firstPoint.p,mousePos.p,1)
         pygame.draw.circle(screen,BLACK,firstPoint.p,distanceBetweenPoints,1)
         textToDisplay=str(distanceBetweenPoints)
-        textSurface=font.render(textToDisplay,True,BLACK)
+        textSurface=fontButtons.render(textToDisplay,True,BLACK)
         screen.blit(textSurface,firstPoint.p+Point.computeMiddlePoint(mousePos,firstPoint).p)
+        ##I must compute angle and lenght here so input text changes dynamically
+
+
+    elif (hasClicked and ((clickTabTwice==False and clickTabOnce==True) or (clickTabTwice==True and clickTabOnce==True))):
+        ##I must change animation based on lenght and angle here so it works like inventor
+        
+        pass
     
-    ###Animation to show all objects
+
+    #######################Animation to show all objects
 
     for link in objectsInScreen:
         pygame.draw.line(screen,BLACK,link.p0.p,link.pf.p,5)
 
-    #update screen
+    #############################Update screen
     ##This let me show a blue and a red axis
     pygame.draw.line(screen,BLUE,[0,0],[0,100],5)
     pygame.draw.line(screen,RED,[0,0],[100,0],5)
 
-    #pygame.display.flip() #can be used to
+    #pygame.display.flip() #can be used too just like update() below
     pygame.display.update()
-    time.sleep(1/30)
+    #time.sleep(1/30)
 
         
