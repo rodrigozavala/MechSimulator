@@ -5,6 +5,7 @@ import sympy as sym
 import math
 import matplotlib.pyplot as plt
 from links import Point,SimpleLink
+from UIElements import UIButton,UIVariables
 
 #############################Defining some colors
 WHITE=(255,255,255)
@@ -33,6 +34,8 @@ LIGHT_BRONW=(140, 111, 62)
 pygame.init()
 size=(1000,620)
 screen=pygame.display.set_mode(size)
+print("Hola, hay un size aquí: AAAAAAAAAAAAAAAAAAAA")
+print(screen.get_size())
 ##############################################
 
 ########################### About link creation and Mouse use
@@ -65,34 +68,27 @@ fontInput=pygame.font.Font(defFont,20)
 
 manager=pygame_gui.UIManager(size)
 
-buttonCreateChar={
-"bHeight":75,
-"bWidth":150,
-"posX":0,
-"posY":size[1]-75
-}
 
-##############################Buttons and Buttons characteristics
-buttonCreate = pygame_gui.elements.UIButton(relative_rect=pygame.Rect(
-    (buttonCreateChar["posX"],buttonCreateChar["posY"]),(buttonCreateChar["bWidth"],buttonCreateChar["bHeight"])),
-    text="Create New Link",manager=manager)
 
-buttonSaveChar = {
-    "bHeight":75,
-    "bWidth":150,
-    "posX":buttonCreateChar["posX"]+buttonCreateChar["bWidth"],
-    "posY":size[1]-75
-}
+UIVariables().setUIVariables(pygame,pygame_gui,manager)
 
-buttonSave = pygame_gui.elements.UIButton(relative_rect=pygame.Rect(
-    (buttonSaveChar["posX"],buttonSaveChar["posY"]),(buttonSaveChar["bWidth"],buttonSaveChar["bHeight"])),
-    text="Save",manager=manager)
+
+##############################Buttons and Buttons characteristics 
+UIbuttonCreate= UIButton("Create New Link")
+
+UIbuttonCreate.setHeight(75).setWidth(150).setPosX(0).setPosY(screen.get_size()[1]-UIbuttonCreate.getHeight())
+UIbuttonSave=UIButton("Save")
+UIbuttonSave.setHeight(75).setWidth(150).setPosX(
+    UIbuttonSave.getPosX()+UIbuttonSave.getWidth()).setPosY(screen.get_size()[1]-UIbuttonCreate.getHeight())
+
+buttonCreate=UIbuttonCreate.showButton()
+buttonSave=UIbuttonSave.showButton()
 
 #####################Input text
 inputRectangle1Char = {
     "bHeight":40,
     "bWidth":150,
-    "posX":buttonSaveChar["posX"]+buttonSaveChar["bWidth"],
+    "posX":UIbuttonSave.getPosX()+UIbuttonSave.getWidth(),
     "posY":size[1]-75
 }
 
@@ -196,7 +192,7 @@ while True:
         pass
     
 
-    #######################Animation to show all objects
+    #######################Animation to show all links
 
     for link in objectsInScreen:
         pygame.draw.line(screen,BLACK,link.p0.p,link.pf.p,5)
