@@ -6,8 +6,10 @@ import math
 import matplotlib.pyplot as plt
 from links import Point,SimpleLink
 from UIElements import UIButton,UIVariables
+from EventLogic import EventManager
 
 #############################Defining some colors
+
 WHITE=(255,255,255)
 CYAN=(0, 251, 255)
 BLACK=(0,0,0)
@@ -34,26 +36,14 @@ LIGHT_BRONW=(140, 111, 62)
 pygame.init()
 size=(1000,620)
 screen=pygame.display.set_mode(size)
-print("Hola, hay un size aquí: AAAAAAAAAAAAAAAAAAAA")
-print(screen.get_size())
+
 ##############################################
 
 ########################### About link creation and Mouse use
 ############################# Related to different modes
-creationMode=False
 ###################About on click buttons events
 i=0
 firstTime=True
-hasClicked= False
-
-clickTabOnce=False
-clickTabTwice=False
-
-LEFT=1
-RIGHT=3
-firstPoint=Point(0,0)
-lastPoint=Point(0,0)
-mousePos=Point(0,0)
 
 objectsInScreen=[]
 ########################### About fonts
@@ -84,6 +74,9 @@ UIbuttonSave.setHeight(75).setWidth(150).setPosX(
 buttonCreate=UIbuttonCreate.showButton()
 buttonSave=UIbuttonSave.showButton()
 
+UIElementsDict={}
+
+UIElementsDict["buttons"]={"create":buttonCreate,"save":buttonSave}
 #####################Input text
 inputRectangle1Char = {
     "bHeight":40,
@@ -98,64 +91,18 @@ angle_text=""
 
 clock=pygame.time.Clock()
 
+
+
+myEvents=EventManager(UIElementsDict,objectsInScreen)
+
 while True:
     time_delta=clock.tick(60)/1000.0
+
+    
     for event in pygame.event.get():
-        print(event)
-        if("pos" in event.__dict__.keys()):
-            #print(event.__dict__["pos"][0])
-            mousePos.setX(event.__dict__["pos"][0])
-            mousePos.setY(event.__dict__["pos"][1])
-            #print(mousePos.p[0],mousePos.p[1])
-        if(event.type==pygame.QUIT):
-            sys.exit()
-            break;
-        elif (event.type == pygame_gui.UI_BUTTON_PRESSED):
-            if(event.ui_element == buttonCreate):##buttonCreate was pressed
-                ###set creation mode
-                creationMode=True
-        elif(creationMode):##creationMode is set True
-            if (event.type == pygame.MOUSEBUTTONDOWN and event.button == LEFT):
-                if(hasClicked):
-                    lastPoint.setX(mousePos.p[0])
-                    lastPoint.setY(mousePos.p[1])
-                    hasClicked=False
-                    creationMode=False
-                    ###Creating new Link in cartesian way
-                    objectsInScreen.append(SimpleLink(firstPoint.getX(),firstPoint.getY(),lastPoint.getX(),lastPoint.getY()))
-
-                elif (not hasClicked):
-                    firstPoint.setX(mousePos.p[0])
-                    firstPoint.setY(mousePos.p[1])
-                    hasClicked=True
-
-            elif(event.type == pygame.KEYDOWN and hasClicked == True):
-                if (clickTabTwice==False and clickTabOnce==False):
-                    ##with clickTabTwice==False and clickTabOnce== True we change angle
-                    ##with clickTabTwice==True and clickTabOnce== True we change length
-                    if(event.key ==  pygame.K_TAB):
-                        clickTabOnce = True
-                        #https://www.geeksforgeeks.org/how-to-get-keyboard-input-in-pygame/
-                        #print("Something Activated")
-                elif (clickTabTwice==False and clickTabOnce== True):#01
-                    if(event.key == pygame.K_TAB):
-                        clickTabTwice = True
-                    elif(event.key == pygame.K_KP_ENTER):
-                        clickTabOnce=False
-                        clickTabTwice=False
-                        hasClicked=False
-
-                elif(clickTabTwice == True and clickTabOnce == True):#11
-                    if(event.key == pygame.K_TAB):
-                        clickTabTwice = False
-                    elif(event.key == pygame.K_KP_ENTER):
-                        clickTabOnce=False
-                        clickTabTwice=False
-                        hasClicked=False
-
-
-
-
+        result=myEvents.manageEvents(event)
+        if result==0:
+            break
 
         manager.process_events(event)
 
@@ -176,17 +123,17 @@ while True:
 
 
     #Animation that must be done if a link is being created
-    if (hasClicked and clickTabTwice==False and clickTabOnce==False):
-        distanceBetweenPoints=Point.computeEuclideanDistance(firstPoint,mousePos)
-        pygame.draw.line(screen,BLACK,firstPoint.p,mousePos.p,1)
-        pygame.draw.circle(screen,BLACK,firstPoint.p,distanceBetweenPoints,1)
+    if (myEvents.hasClicked and myEvents.clickTabTwice==False and myEvents.clickTabOnce==False):
+        distanceBetweenPoints=Point.computeEuclideanDistance(myEvents.firstPoint,myEvents.mousePos)
+        pygame.draw.line(screen,BLACK,myEvents.firstPoint.p,myEvents.mousePos.p,1)
+        pygame.draw.circle(screen,BLACK,myEvents.firstPoint.p,distanceBetweenPoints,1)
         textToDisplay=str(distanceBetweenPoints)
         textSurface=fontButtons.render(textToDisplay,True,BLACK)
-        screen.blit(textSurface,firstPoint.p+Point.computeMiddlePoint(mousePos,firstPoint).p)
+        screen.blit(textSurface,myEvents.firstPoint.p+Point.computeMiddlePoint(myEvents.mousePos,myEvents.firstPoint).p)
         ##I must compute angle and lenght here so input text changes dynamically
 
 
-    elif (hasClicked and ((clickTabTwice==False and clickTabOnce==True) or (clickTabTwice==True and clickTabOnce==True))):
+    elif (myEvents.hasClicked and ((myEvents.clickTabTwice==False and myEvents.clickTabOnce==True) or (myEvents.clickTabTwice==True and myEvents.clickTabOnce==True))):
         ##I must change animation based on lenght and angle here so it works like inventor
         
         pass
@@ -194,7 +141,7 @@ while True:
 
     #######################Animation to show all links
 
-    for link in objectsInScreen:
+    for link in myEvents.objectsInScreen:
         pygame.draw.line(screen,BLACK,link.p0.p,link.pf.p,5)
 
     #############################Update screen
