@@ -88,6 +88,7 @@ inputRectangle1Char = {
 inputRectangle1=pygame.Rect(inputRectangle1Char["posX"],inputRectangle1Char["posY"],inputRectangle1Char["bWidth"],inputRectangle1Char["bHeight"])
 
 angle_text=""
+user_text=""
 
 clock=pygame.time.Clock()
 
@@ -118,7 +119,7 @@ while True:
 
 
     #Input text on screen
-    text_surface = fontInput.render("Hola", True, (0, 0, 0))
+    text_surface = fontInput.render(user_text, True, (0, 0, 0))
     screen.blit(text_surface, (inputRectangle1.x+100, inputRectangle1.y+5))
 
 
@@ -133,8 +134,15 @@ while True:
         ##I must compute angle and lenght here so input text changes dynamically
 
 
-    elif (myEvents.hasClicked and ((myEvents.clickTabTwice==False and myEvents.clickTabOnce==True) or (myEvents.clickTabTwice==True and myEvents.clickTabOnce==True))):
+    elif (myEvents.hasClicked and ((myEvents.changeAngle==True) or (myEvents.changeLength==True))):
         ##I must change animation based on lenght and angle here so it works like inventor
+        if(myEvents.changeAngle==True): #01 change length
+                user_text=myEvents.input_text
+                text_surface = fontInput.render(user_text, True, (0, 0, 0))
+                screen.blit(text_surface, (inputRectangle1.x+100, inputRectangle1.y+5))
+        elif(myEvents.changeLength==True): #11 change angle
+
+            pass
         
         pass
     

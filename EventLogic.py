@@ -16,6 +16,9 @@ class EventManager:
         self.clickTabOnce=False
         self.UIElements=UIElements
         self.objectsInScreen=objectsInScreen
+        self.input_text=""
+        self.changeAngle=False
+        self.changeLength=False
 
     def manageEvents(self,event):
         print(event)
@@ -47,27 +50,44 @@ class EventManager:
                     self.hasClicked=True
 
             elif(event.type == pygame.KEYDOWN and self.hasClicked == True):
-                if (self.clickTabTwice==False and self.clickTabOnce==False):
+                if (self.clickTabTwice==False and self.clickTabOnce==False):#00
                     ##with clickTabTwice==False and clickTabOnce== True we change angle
                     ##with clickTabTwice==True and clickTabOnce== True we change length
                     if(event.key ==  pygame.K_TAB):
                         self.clickTabOnce = True
                         #https://www.geeksforgeeks.org/how-to-get-keyboard-input-in-pygame/
-                        #print("Something Activated")
+                        #print("Something Activated")   
                 elif (self.clickTabTwice==False and self.clickTabOnce== True):#01
                     if(event.key == pygame.K_TAB):
                         self.clickTabTwice = True
+                        self.changeAngle=False
                     elif(event.key == pygame.K_KP_ENTER):
                         self.clickTabOnce=False
                         self.clickTabTwice=False
                         self.hasClicked=False
+                        self.changeAngle=False
+                    elif (event.type == pygame.KEYDOWN):
+                        self.changeAngle=True
+                        self.managing_input_text(event)
 
                 elif(self.clickTabTwice == True and self.clickTabOnce == True):#11
                     if(event.key == pygame.K_TAB):
                         self.clickTabTwice = False
+                        self.changeLength=False
                     elif(event.key == pygame.K_KP_ENTER):
                         self.clickTabOnce=False
                         self.clickTabTwice=False
                         self.hasClicked=False
+                        self.changeLength=False
+                    elif (event.type == pygame.KEYDOWN):
+                        self.changeLength=True
+                        self.managing_input_text(event)
 
         return 1
+    
+    def managing_input_text(self,event):
+        if event.key == pygame.K_BACKSPACE and len(self.input_text)>0:
+            # get text input from 0 to -1 i.e. end.
+            self.input_text = self.input_text[:-1]
+        else:
+            self.input_text += event.unicode
