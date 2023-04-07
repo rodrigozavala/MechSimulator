@@ -1,4 +1,6 @@
 
+from Color import Color
+from links import Point
 #class UIVariablesMeta:
 #    _instances={}
 #    def __call__(self, *args,**kwds):
@@ -72,3 +74,40 @@ class UIButton:
     def showButton(self):
         return self.__pygame_gui.elements.UIButton(relative_rect=self.__pygame.Rect(
             (self.__posX,self.__posY),(self.__bWidth,self.__bHeight)),text=self.__text,manager=self.__manager)
+    
+
+class Cursor:
+    def __init__(self,x,y,pygame,screen,scale=1,width=1):
+        self.position=Point(x,y)
+        self.pygame=pygame
+        self.scale=scale
+        self.screen=screen
+        self.length=10
+        self.width=width
+        self.initH=Point(self.position.getX()-self.length*self.scale/2,self.position.getY())
+        self.endH=Point(self.position.getX()+self.length*self.scale/2,self.position.getY())
+
+        self.initV=Point(self.position.getX(),self.position.getY()-self.length*self.scale/2)
+        self.endV=Point(self.position.getX(),self.position.getY()+self.length*self.scale/2)
+
+    
+    def setPosition(self,x,y):
+        self.position.setX(x)
+        self.position.setY(y)
+
+        self.initH.setX(self.position.getX()-self.length*self.scale/2)
+        self.initH.setY(self.position.getY())
+        self.endH.setX(self.position.getX()+self.length*self.scale/2)
+        self.endH.setY(self.position.getY())
+
+        self.initV.setX(self.position.getX())
+        self.initV.setY(self.position.getY()-self.length*self.scale/2)
+        self.endV.setX(self.position.getX())
+        self.endV.setY(self.position.getY()+self.length*self.scale/2)
+
+
+    def draw(self,x=None,y=None):
+        if(x!=None and y!=None):
+            self.setPosition(x,y)
+        self.pygame.draw.line(self.screen,Color.BLACK.colorCode,self.initH.p,self.endH.p,self.width)
+        self.pygame.draw.line(self.screen,Color.BLACK.colorCode,self.initV.p,self.endV.p,self.width)
