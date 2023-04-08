@@ -42,10 +42,9 @@ class EventManager:
     def manageEvents(self,event):
         print(event)
         if("pos" in event.__dict__.keys()):
-            #print(event.__dict__["pos"][0])
             self.mousePos.setX(event.__dict__["pos"][0])
             self.mousePos.setY(event.__dict__["pos"][1])
-            #print(mousePos.p[0],mousePos.p[1])
+            
         if(event.type==pygame.QUIT):
             sys.exit()
             return 0
@@ -59,13 +58,14 @@ class EventManager:
         ##################################################### Check Modes
 
         elif(self.creationMode):##creationMode is set True
+            #Parse user action into inputs
             if(event.type == pygame.MOUSEBUTTONDOWN and event.button == LEFT):
                 self.userInput="LClick"
             elif(event.type == pygame.MOUSEBUTTONDOWN and event.button == RIGHT):
                 self.userInput="RClick"
             elif(event.type == pygame.KEYDOWN and event.key == pygame.K_TAB):
                 self.userInput="Tab_Pressed"
-            elif(event.type == pygame.KEYDOWN and event.key == pygame.K_KP_ENTER):
+            elif(event.type == pygame.KEYDOWN and event.key == 13):#pygame.K_KP_ENTER):
                 self.userInput="Enter_Pressed"
             elif(event.type == pygame.KEYDOWN):
                 self.userInput="Typing"
@@ -76,28 +76,56 @@ class EventManager:
             #"CreationModeButtonPressed"
             #"Tab_A1x" "Tab_A2y" "Enter_A3y" "Enter_A4x"
             #"Tab_B1_theta","Tab_B2_long","Enter_B3_long","Enter_B4_theta"
-            if(self.currentState =="Tab_A1x"):
+
+            if(self.currentState =="CreationModeButtonPressed"):
+                self.inputX=str(self.mousePos.getX())
+                self.inputY=str(self.mousePos.getY())
+
+            elif(self.currentState =="Tab_A1x"):
                 self.changeX=True
                 self.changeY=False
-            
-                self.clickTabOnce=True
-                self.clickTabTwice=False
 
+                self.inputY=str(self.mousePos.getY())
+                self.inputX=self.managing_input_text(event,self.inputX)
+                print(self.inputX)
+                
             elif(self.currentState =="Tab_A2y"):
                 self.changeX=False
                 self.changeY=True
 
+                self.inputX=str(self.mousePos.getX())
+                self.managing_input_text(event,self.inputY)
+                
             elif(self.currentState =="Tab_B1_theta"):
                 self.changeAngle=True
                 self.changeLength=False
+                self.inputAngle=self.managing_input_text(event,self.inputAngle)
 
             elif(self.currentState =="Tab_B2_long"):
                 self.changeAngle=False
                 self.changeLength=True
-            
+                self.inputLength=self.managing_input_text(event,self.inputLength)
+
+            elif(self.currentState == "Enter_A3y"):
+                
+                self.inputY=self.managing_input_text(event,self.inputY)
+                
+            elif(self.currentState == "Enter_A4x"):
+
+                self.inputX=self.managing_input_text(event,self.inputX)
+                
+            elif(self.currentState == "Enter_B3_long"):
+                self.managing_input_text(event,self.inputLength)
+            elif(self.currentState == "Enter_B4_theta"):
+                self.managing_input_text(event,self.inputAngle)
+                
             if(self.currentState == "FirstPointCreated" and self.hasClicked==False):
-                self.firstPoint.setX(self.mousePos.p[0])
-                self.firstPoint.setY(self.mousePos.p[1])
+                if(self.changeX==True or self.changeY==True):
+                    self.firstPoint.setX(int(self.inputX))
+                    self.firstPoint.setY(int(self.inputY))
+                else:
+                    self.firstPoint.setX(self.mousePos.p[0])
+                    self.firstPoint.setY(self.mousePos.p[1])
                 
                 self.hasClicked=True
                 self.clickTabOnce=False
@@ -106,29 +134,11 @@ class EventManager:
                 self.changeX=False
                 self.changeY=False
 
-            elif(self.currentState == "Tab_A1x"):
-                self.managing_input_text(event)
-                self.inputX=self.input_text
-            elif(self.currentState == "Tab_A2y"):
-                self.managing_input_text(event)
-                self.inputY=self.input_text
-            elif(self.currentState == "Enter_A3y"):
-                self.inputY=self.input_text
-                self.managing_input_text(event)
-            elif(self.currentState == "Enter_A4x"):
-                self.managing_input_text(event)
-                self.inputX=self.input_text
-            elif(self.currentState == "Tab_B1_theta"):
-                self.managing_input_text(event)
-            elif(self.currentState == "Tab_B2_long"):
-                self.managing_input_text(event)
-            elif(self.currentState == "Enter_B3_long"):
-                self.managing_input_text(event)
-            elif(self.currentState == "Enter_B4_theta"):
-                self.managing_input_text(event)
             elif(self.currentState == "Line_created"):
+
                 self.lastPoint.setX(self.mousePos.p[0])
                 self.lastPoint.setY(self.mousePos.p[1])
+                ###Creating new Link in cartesian way
                 self.objectsInScreen.append(SimpleLink(self.firstPoint.getX(),self.firstPoint.getY(),self.lastPoint.getX(),self.lastPoint.getY()))
                 self.lineCreationProcess.rebootProcess()
                 self.creationMode=False
@@ -136,65 +146,22 @@ class EventManager:
                 self.clickTabOnce=False
                 self.clickTabTwice=False
 
-            """
-            if (event.type == pygame.MOUSEBUTTONDOWN and event.button == LEFT):
-                if(self.hasClicked):
-                    self.lastPoint.setX(self.mousePos.p[0])
-                    self.lastPoint.setY(self.mousePos.p[1])
-                    self.hasClicked=False
-                    self.creationMode=False
-                    ###Creating new Link in cartesian way
-                    self.objectsInScreen.append(SimpleLink(self.firstPoint.getX(),self.firstPoint.getY(),self.lastPoint.getX(),self.lastPoint.getY()))
-
-                elif (not self.hasClicked):
-                    self.firstPoint.setX(self.mousePos.p[0])
-                    self.firstPoint.setY(self.mousePos.p[1])
-                    self.hasClicked=True
-
-            elif(event.type == pygame.KEYDOWN and self.hasClicked == True):
-                if (self.clickTabTwice==False and self.clickTabOnce==False):#00
-                    ##with clickTabTwice==False and clickTabOnce== True we change angle
-                    ##with clickTabTwice==True and clickTabOnce== True we change length
-                    if(event.key ==  pygame.K_TAB):
-                        self.clickTabOnce = True
-                        #https://www.geeksforgeeks.org/how-to-get-keyboard-input-in-pygame/
-                        #print("Something Activated")   
-                elif (self.clickTabTwice==False and self.clickTabOnce== True):#01
-                    if(event.key == pygame.K_TAB):
-                        self.clickTabTwice = True
-                        self.changeAngle=False
-                    elif(event.key == pygame.K_KP_ENTER):
-                        self.clickTabOnce=False
-                        self.clickTabTwice=False
-                        self.hasClicked=False
-                        self.changeAngle=False
-                    elif (event.type == pygame.KEYDOWN):
-                        self.changeAngle=True
-                        self.managing_input_text(event)
-
-                elif(self.clickTabTwice == True and self.clickTabOnce == True):#11
-                    if(event.key == pygame.K_TAB):
-                        self.clickTabTwice = False
-                        self.changeLength=False
-                    elif(event.key == pygame.K_KP_ENTER):
-                        self.clickTabOnce=False
-                        self.clickTabTwice=False
-                        self.hasClicked=False
-                        self.changeLength=False
-                    elif (event.type == pygame.KEYDOWN):
-                        self.changeLength=True
-                        self.managing_input_text(event)"""
 
         return 1
     
-    def managing_input_text(self,event):
+    def managing_input_text(self,event,text):
         if(event.type == pygame.KEYDOWN):
-            if event.key == pygame.K_BACKSPACE and len(self.input_text)>0:
+            if event.key == pygame.K_BACKSPACE and len(text)>0:
                 # get text input from 0 to -1 i.e. end.
-                self.input_text = self.input_text[:-1]
+                text = text[:-1]
+                if(text== ""):
+                    return "0"
             else:
-                if(event.unicode.isnumeric() or (event.unicode == "." and "." not in self.input_text)):
-                    self.input_text += event.unicode
+                if(event.unicode.isnumeric() or (event.unicode == "." and "." not in text)):
+                    if(text == "0"):
+                        text = text[:-1]
+                    text += event.unicode
+        return text
 
 
 

@@ -5,7 +5,7 @@ import sympy as sym
 import math
 import matplotlib.pyplot as plt
 from links import Point,SimpleLink
-from UIElements import UIButton,UIVariables,Cursor
+from UIElements import UIButton, UIVariables, UIInputTextBar, Cursor
 from EventLogic import EventManager
 from Color import Color
 
@@ -38,6 +38,8 @@ UIVariables().setUIVariables(pygame,pygame_gui,manager)
 
 myCursor=Cursor(0,0,pygame,screen)
 
+phantomCursor=Cursor(0,0,pygame,screen)
+
 ##############################Buttons and Buttons characteristics 
 UIbuttonCreate= UIButton("Create New Link")
 
@@ -54,53 +56,23 @@ UIElementsDict={}
 
 UIElementsDict["buttons"]={"create":buttonCreate,"save":buttonSave}
 #####################Input text
-inputRectangle1Char = {
-    "bHeight":40,
-    "bWidth":150,
-    "posX":UIbuttonSave.getPosX()+UIbuttonSave.getWidth(),
-    "posY":size[1]-75
-}
 
-inputRectangle1=pygame.Rect(inputRectangle1Char["posX"],inputRectangle1Char["posY"],inputRectangle1Char["bWidth"],inputRectangle1Char["bHeight"])
+inputRectangleX=UIInputTextBar(40,150).setPosX(UIbuttonSave.getPosX()+UIbuttonSave.getWidth()).setPosY(size[1]-75)
 
-inputRectangle2Char = {
-    "bHeight":40,
-    "bWidth":150,
-    "posX":UIbuttonSave.getPosX()+UIbuttonSave.getWidth()+150,
-    "posY":size[1]-75
-}
+inputRectangleY=UIInputTextBar(40,150).setPosX(inputRectangleX.getPosX()+inputRectangleX.getWidth()).setPosY(size[1]-75)
 
-inputRectangle2=pygame.Rect(inputRectangle2Char["posX"],inputRectangle2Char["posY"],inputRectangle2Char["bWidth"],inputRectangle2Char["bHeight"])
+inputRectangleTheta=UIInputTextBar(40,150).setPosX(inputRectangleY.getPosX()+inputRectangleY.getWidth()).setPosY(size[1]-75)
 
-inputRectangle3Char = {
-    "bHeight":40,
-    "bWidth":150,
-    "posX":UIbuttonSave.getPosX()+UIbuttonSave.getWidth()+150+150,
-    "posY":size[1]-75
-}
-
-inputRectangle3=pygame.Rect(inputRectangle3Char["posX"],inputRectangle3Char["posY"],inputRectangle3Char["bWidth"],inputRectangle3Char["bHeight"])
-
-inputRectangle4Char = {
-    "bHeight":40,
-    "bWidth":150,
-    "posX":UIbuttonSave.getPosX()+UIbuttonSave.getWidth()+150+150+150,
-    "posY":size[1]-75
-}
-
-inputRectangle4=pygame.Rect(inputRectangle4Char["posX"],inputRectangle4Char["posY"],inputRectangle4Char["bWidth"],inputRectangle4Char["bHeight"])
-
-
-
+inputRectangleLong=UIInputTextBar(40,150).setPosX(inputRectangleTheta.getPosX()+inputRectangleTheta.getWidth()).setPosY(size[1]-75)
 
 
 angle_text=""
 user_text=""
 
-user_textX=""
-user_textY=""
-user_textAngle=""
-user_textLenght=""
+#user_textX=""
+#user_textY=""
+#user_textAngle=""
+#user_textLenght=""
 
 clock=pygame.time.Clock()
     
@@ -129,84 +101,91 @@ while True:
     manager.update(time_delta)
 
     manager.draw_ui(screen)
-
-    pygame.draw.rect(screen,Color.WHITE.colorCode, inputRectangle1)
-    pygame.draw.rect(screen,Color.WHITE.colorCode, inputRectangle2)
-    pygame.draw.rect(screen,Color.WHITE.colorCode, inputRectangle3)
-    pygame.draw.rect(screen,Color.WHITE.colorCode, inputRectangle4)
-    
-
+    #Show rectangles just once
+    inputRectangleX.showRectangle(screen)
+    inputRectangleY.showRectangle(screen)
+    inputRectangleTheta.showRectangle(screen)
+    inputRectangleLong.showRectangle(screen)
 
     #Input text on screen
-    text_surface = fontInput.render(user_textX, True, (0, 0, 0))
-    screen.blit(text_surface, (inputRectangle1.x+100, inputRectangle1.y+5))
 
-    text_surface = fontInput.render(user_textY, True, (0, 0, 0))
-    screen.blit(text_surface, (inputRectangle2.x+100, inputRectangle2.y+5))
-
-    text_surface = fontInput.render(user_textAngle, True, (0, 0, 0))
-    screen.blit(text_surface, (inputRectangle3.x+100, inputRectangle3.y+5))
-
-    text_surface = fontInput.render(user_textLenght, True, (0, 0, 0))
-    screen.blit(text_surface, (inputRectangle4.x+100, inputRectangle4.y+5))
+    inputRectangleX.showInputText(screen,fontInput)
+    inputRectangleY.showInputText(screen,fontInput)
+    inputRectangleTheta.showInputText(screen,fontInput)
+    inputRectangleLong.showInputText(screen,fontInput)
 
     if(myEvents.creationMode==True):
         if(myEvents.currentState in ["FirstPointCreated","Tab_B1_theta","Tab_B2_long","Enter_B3_long","Enter_B4_theta"] ):
             distanceBetweenPoints=Point.computeEuclideanDistance( myEvents.firstPoint,myEvents.mousePos)
             pygame.draw.line(screen,Color.BLACK.colorCode,myEvents.firstPoint.p,myEvents.mousePos.p,1)
             pygame.draw.circle(screen,Color.BLACK.colorCode,myEvents.firstPoint.p,distanceBetweenPoints,1)
+
             textToDisplay=str(distanceBetweenPoints)
+
             textSurface=fontButtons.render(textToDisplay,True,Color.BLACK.colorCode)
             screen.blit(textSurface,myEvents.firstPoint.p+Point.computeMiddlePoint(myEvents.mousePos,myEvents.firstPoint).p)
         
         if(myEvents.currentState =="CreationModeButtonPressed"):
-            user_textX=str(myEvents.mousePos.getX())
-            user_textY=str(myEvents.mousePos.getY())
-            myEvents.inputX=user_textX
-            myEvents.inputY=user_textY
+            inputRectangleX.setInputText(str(myEvents.mousePos.getX()))
+            inputRectangleY.setInputText(str(myEvents.mousePos.getY()))
 
-        if(myEvents.currentState in ["Tab_A1x","Enter_A4x"]):
-            user_textX=myEvents.inputX
-            text_surface = fontInput.render(user_text, True, (0, 0, 0))
-            screen.blit(text_surface, (inputRectangle1.x+100, inputRectangle1.y+5))
-        elif(myEvents.currentState in ["Tab_A2y","Enter_A3y"]):
-            user_textY=myEvents.inputY
-            text_surface = fontInput.render(user_text, True, (0, 0, 0))
-            screen.blit(text_surface, (inputRectangle2.x+100, inputRectangle2.y+5))
+        if(myEvents.currentState in ["Tab_A1x","Enter_A4x","Tab_A2y","Enter_A3y"]):
+            if(myEvents.currentState in ["Tab_A1x","Enter_A4x"]):
 
-        elif(myEvents.currentState in ["Tab_B1_theta","Enter_B4_theta"]):
-            pass
-        elif(myEvents.currentState in ["Tab_B2_long","Enter_B3_long"]):
-            pass
-
-        """
-         #Animation that must be done if a link is being created (Creation Mode)
-        if (myEvents.hasClicked and myEvents.clickTabTwice==False and myEvents.clickTabOnce==False):
-
-            distanceBetweenPoints=Point.computeEuclideanDistance( myEvents.firstPoint,myEvents.mousePos)
-            pygame.draw.line(screen,Color.BLACK.colorCode,myEvents.firstPoint.p,myEvents.mousePos.p,1)
-            pygame.draw.circle(screen,Color.BLACK.colorCode,myEvents.firstPoint.p,distanceBetweenPoints,1)
-            textToDisplay=str(distanceBetweenPoints)
-            textSurface=fontButtons.render(textToDisplay,True,Color.BLACK.colorCode)
-            screen.blit(textSurface,myEvents.firstPoint.p+Point.computeMiddlePoint(myEvents.mousePos,myEvents.firstPoint).p)
-            ##I must compute angle and lenght here so input text changes dynamically
+                if(myEvents.currentState == "Enter_A4x"):
+                    inputRectangleY.setInputText(int(myEvents.inputY))
+                    inputRectangleY.showInputText(screen,fontInput)
 
 
-        elif (myEvents.hasClicked and ((myEvents.changeAngle==True) or (myEvents.changeLength==True))):
-            ##I must change animation based on lenght and angle here so it works like inventor
-            if(myEvents.changeAngle==True): #01 change length
-                    user_text=myEvents.input_text
-                    text_surface = fontInput.render(user_text, True, (0, 0, 0))
-                    screen.blit(text_surface, (inputRectangle1.x+100, inputRectangle1.y+5))
-            elif(myEvents.changeLength==True): #11 change angle
+                    phantomCursor.draw(int(inputRectangleX.getInputText()),int(inputRectangleY.getInputText()))
+
+                    inputRectangleX.setInputText(myEvents.inputX)
+                    inputRectangleX.showInputText(screen,fontInput)
+
+                elif(myEvents.currentState == "Tab_A1x"):
+                    inputRectangleY.setInputText(str(myEvents.mousePos.getY()))
+                    phantomCursor.draw(int(inputRectangleX.getInputText()),myEvents.mousePos.p[1])
+                    
+                    #Shows vertical line
+                    pygame.draw.line(screen,Color.BLACK.colorCode,[int(inputRectangleX.getInputText()),0],[int(inputRectangleX.getInputText()),10000],1)
+                    inputRectangleX.setInputText(myEvents.inputX)
+                    inputRectangleX.showInputText(screen,fontInput)
+
+
+            elif(myEvents.currentState in ["Tab_A2y","Enter_A3y"]):
+                
+                if(myEvents.currentState == "Enter_A3y"):
+                    inputRectangleX.setInputText(myEvents.inputX)
+                    inputRectangleX.showInputText(screen,fontInput)
+
+                    phantomCursor.draw(int(inputRectangleX.getInputText()),int(inputRectangleY.getInputText()))
+
+                    inputRectangleY.setInputText(myEvents.inputY)
+                    inputRectangleY.showInputText(screen,fontInput)
+                    
+
+                elif(myEvents.currentState == "Tab_A2y"):
+                    inputRectangleX.setInputText(str(myEvents.mousePos.getX()))
+                    phantomCursor.draw(myEvents.mousePos.p[0],int(inputRectangleY.getInputText()))
+                    
+                    #Shows horizontal line
+                    pygame.draw.line(screen,Color.BLACK.colorCode,[0,int(inputRectangleY.getInputText())],[10000,int(inputRectangleY.getInputText())],1)
+                    inputRectangleY.setInputText(myEvents.inputY)
+                    inputRectangleY.showInputText(screen,fontInput)
+
+
+
+        elif(myEvents.currentState in ["Tab_B1_theta","Enter_B4_theta","Tab_B2_long","Enter_B3_long"]):
+            if(myEvents.currentState in ["Tab_B1_theta","Enter_B4_theta"]):
+
                 pass
-            pass"""
+            elif(myEvents.currentState in ["Tab_B2_long","Enter_B3_long"]):
+
+                pass
+        else:
+
+            pass
         
-
-
-
-
-
     #######################Animation to show all links
 
     for link in myEvents.objectsInScreen:
@@ -220,7 +199,5 @@ while True:
     #pygame.display.flip() #can be used too just like update() below
     pygame.display.update()
     #time.sleep(1/30)
-
-
 
         
