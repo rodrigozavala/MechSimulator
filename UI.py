@@ -116,72 +116,76 @@ while True:
 
     if(myEvents.creationMode==True):
         if(myEvents.currentState in ["FirstPointCreated","Tab_B1_theta","Tab_B2_long","Enter_B3_long","Enter_B4_theta"] ):
-            distanceBetweenPoints=Point.computeEuclideanDistance( myEvents.firstPoint,myEvents.mousePos)
-            pygame.draw.line(screen,Color.BLACK.colorCode,myEvents.firstPoint.p,myEvents.mousePos.p,1)
-            pygame.draw.circle(screen,Color.BLACK.colorCode,myEvents.firstPoint.p,distanceBetweenPoints,1)
+            if(myEvents.currentState == "FirstPointCreated" ):
+                distanceBetweenPoints=Point.computeEuclideanDistance( myEvents.firstPoint,myEvents.mousePos)
+                pygame.draw.line(screen,Color.BLACK.colorCode,myEvents.firstPoint.p,myEvents.mousePos.p,1)
+                pygame.draw.circle(screen,Color.BLACK.colorCode,myEvents.firstPoint.p,distanceBetweenPoints,1)
 
-            textToDisplay=str(distanceBetweenPoints)
+                textToDisplay=str(distanceBetweenPoints)
 
-            textSurface=fontButtons.render(textToDisplay,True,Color.BLACK.colorCode)
-            screen.blit(textSurface,myEvents.firstPoint.p+Point.computeMiddlePoint(myEvents.mousePos,myEvents.firstPoint).p)
-        
+                textSurface=fontButtons.render(textToDisplay,True,Color.BLACK.colorCode)
+                screen.blit(textSurface,myEvents.firstPoint.p+Point.computeMiddlePoint(myEvents.mousePos,myEvents.firstPoint).p)
+                phantomCursor.position.setX(0)
+                phantomCursor.position.setY(0)
+
+
+            elif(myEvents.currentState == "Tab_B1_theta" ):
+                inputRectangleTheta.setInputText(str(str(myEvents.firstPoint.computeAngleDegrees(myEvents.firstPoint,myEvents.mousePos))))
+            
+                pass
+            elif(myEvents.currentState == "Enter_B4_theta"):
+
+                pass
+            elif(myEvents.currentState == "Tab_B2_long"):
+
+                pass
+            elif(myEvents.currentState == "Enter_B3_long"):
+
+                pass
         if(myEvents.currentState =="CreationModeButtonPressed"):
             inputRectangleX.setInputText(str(myEvents.mousePos.getX()))
             inputRectangleY.setInputText(str(myEvents.mousePos.getY()))
 
-        if(myEvents.currentState in ["Tab_A1x","Enter_A4x","Tab_A2y","Enter_A3y"]):
-            if(myEvents.currentState in ["Tab_A1x","Enter_A4x"]):
 
-                if(myEvents.currentState == "Enter_A4x"):
-                    inputRectangleY.setInputText(int(myEvents.inputY))
-                    inputRectangleY.showInputText(screen,fontInput)
+        elif(myEvents.currentState == "Tab_A1x"):
+            inputRectangleY.setInputText(str(myEvents.mousePos.getY()))
 
+            phantomCursor.draw(int(inputRectangleX.getInputText()),myEvents.mousePos.p[1])
+            
+            #Shows vertical line
+            pygame.draw.line(screen,Color.BLACK.colorCode,[int(inputRectangleX.getInputText()),0],[int(inputRectangleX.getInputText()),10000],1)
+            inputRectangleX.setInputText(myEvents.inputX)
+            inputRectangleX.showInputText(screen,fontInput)
 
-                    phantomCursor.draw(int(inputRectangleX.getInputText()),int(inputRectangleY.getInputText()))
+        elif(myEvents.currentState == "Enter_A3y"):
+            inputRectangleX.setInputText(myEvents.inputX)
+            inputRectangleX.showInputText(screen,fontInput)
 
-                    inputRectangleX.setInputText(myEvents.inputX)
-                    inputRectangleX.showInputText(screen,fontInput)
+            phantomCursor.draw(int(inputRectangleX.getInputText()),int(inputRectangleY.getInputText()))
+            
+            pygame.draw.line(screen,Color.BLACK.colorCode,[0,int(inputRectangleY.getInputText())],[10000,int(inputRectangleY.getInputText())],1)
+            inputRectangleY.setInputText(myEvents.inputY)
+            inputRectangleY.showInputText(screen,fontInput)
+            
+        elif(myEvents.currentState == "Tab_A2y"):
+            inputRectangleX.setInputText(str(myEvents.mousePos.getX()))
+            phantomCursor.draw(myEvents.mousePos.p[0],int(inputRectangleY.getInputText()))
+            
+            #Shows horizontal line
+            pygame.draw.line(screen,Color.BLACK.colorCode,[0,int(inputRectangleY.getInputText())],[10000,int(inputRectangleY.getInputText())],1)
+            inputRectangleY.setInputText(myEvents.inputY)
+            inputRectangleY.showInputText(screen,fontInput)
 
-                elif(myEvents.currentState == "Tab_A1x"):
-                    inputRectangleY.setInputText(str(myEvents.mousePos.getY()))
-                    phantomCursor.draw(int(inputRectangleX.getInputText()),myEvents.mousePos.p[1])
-                    
-                    #Shows vertical line
-                    pygame.draw.line(screen,Color.BLACK.colorCode,[int(inputRectangleX.getInputText()),0],[int(inputRectangleX.getInputText()),10000],1)
-                    inputRectangleX.setInputText(myEvents.inputX)
-                    inputRectangleX.showInputText(screen,fontInput)
+        elif(myEvents.currentState == "Enter_A4x"):
+            inputRectangleY.setInputText(myEvents.inputY)
+            inputRectangleY.showInputText(screen,fontInput)
 
+            phantomCursor.draw(int(inputRectangleX.getInputText()),int(inputRectangleY.getInputText()))
 
-            elif(myEvents.currentState in ["Tab_A2y","Enter_A3y"]):
-                
-                if(myEvents.currentState == "Enter_A3y"):
-                    inputRectangleX.setInputText(myEvents.inputX)
-                    inputRectangleX.showInputText(screen,fontInput)
-
-                    phantomCursor.draw(int(inputRectangleX.getInputText()),int(inputRectangleY.getInputText()))
-
-                    inputRectangleY.setInputText(myEvents.inputY)
-                    inputRectangleY.showInputText(screen,fontInput)
-                    
-
-                elif(myEvents.currentState == "Tab_A2y"):
-                    inputRectangleX.setInputText(str(myEvents.mousePos.getX()))
-                    phantomCursor.draw(myEvents.mousePos.p[0],int(inputRectangleY.getInputText()))
-                    
-                    #Shows horizontal line
-                    pygame.draw.line(screen,Color.BLACK.colorCode,[0,int(inputRectangleY.getInputText())],[10000,int(inputRectangleY.getInputText())],1)
-                    inputRectangleY.setInputText(myEvents.inputY)
-                    inputRectangleY.showInputText(screen,fontInput)
-
-
-
-        elif(myEvents.currentState in ["Tab_B1_theta","Enter_B4_theta","Tab_B2_long","Enter_B3_long"]):
-            if(myEvents.currentState in ["Tab_B1_theta","Enter_B4_theta"]):
-
-                pass
-            elif(myEvents.currentState in ["Tab_B2_long","Enter_B3_long"]):
-
-                pass
+            pygame.draw.line(screen,Color.BLACK.colorCode,[int(inputRectangleX.getInputText()),0],[int(inputRectangleX.getInputText()),10000],1)
+            inputRectangleX.setInputText(myEvents.inputX)
+            inputRectangleX.showInputText(screen,fontInput)
+        
         else:
 
             pass

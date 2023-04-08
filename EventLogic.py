@@ -1,6 +1,7 @@
 from links import Point,SimpleLink
 import pygame_gui
 import pygame, sys
+import math
 
 LEFT=1
 RIGHT=3
@@ -84,45 +85,60 @@ class EventManager:
             elif(self.currentState =="Tab_A1x"):
                 self.changeX=True
                 self.changeY=False
-
                 self.inputY=str(self.mousePos.getY())
                 self.inputX=self.managing_input_text(event,self.inputX)
-                print(self.inputX)
+                
                 
             elif(self.currentState =="Tab_A2y"):
                 self.changeX=False
                 self.changeY=True
-
                 self.inputX=str(self.mousePos.getX())
-                self.managing_input_text(event,self.inputY)
+                self.inputY=self.managing_input_text(event,self.inputY)
                 
             elif(self.currentState =="Tab_B1_theta"):
                 self.changeAngle=True
                 self.changeLength=False
+                self.inputLength=self.firstPoint.computeEuclideanDistance(self.firstPoint,self.mousePos)
                 self.inputAngle=self.managing_input_text(event,self.inputAngle)
 
             elif(self.currentState =="Tab_B2_long"):
                 self.changeAngle=False
                 self.changeLength=True
+                self.inputAngle=str(self.firstPoint.computeAngleDegrees(self.firstPoint,self.mousePos))
                 self.inputLength=self.managing_input_text(event,self.inputLength)
 
             elif(self.currentState == "Enter_A3y"):
-                
+                self.changeX=True
+                self.changeY=True
                 self.inputY=self.managing_input_text(event,self.inputY)
                 
             elif(self.currentState == "Enter_A4x"):
-
+                self.changeX=True
+                self.changeY=True
                 self.inputX=self.managing_input_text(event,self.inputX)
                 
             elif(self.currentState == "Enter_B3_long"):
-                self.managing_input_text(event,self.inputLength)
+                self.changeAngle=True
+                self.changeLength=True
+                self.inputLength=self.managing_input_text(event,self.inputLength)
             elif(self.currentState == "Enter_B4_theta"):
-                self.managing_input_text(event,self.inputAngle)
+                self.changeAngle=True
+                self.changeLength=True
+                self.inputAngle=self.managing_input_text(event,self.inputAngle)
                 
             if(self.currentState == "FirstPointCreated" and self.hasClicked==False):
-                if(self.changeX==True or self.changeY==True):
+
+                if(self.changeX==True and self.changeY==True):
                     self.firstPoint.setX(int(self.inputX))
                     self.firstPoint.setY(int(self.inputY))
+                elif(self.changeX==True):
+                    self.firstPoint.setX(int(self.inputX))
+                    self.firstPoint.setY(self.mousePos.p[1])
+
+                elif(self.changeY==True):
+                    self.firstPoint.setX(self.mousePos.p[0])
+                    self.firstPoint.setY(int(self.inputY))
+
                 else:
                     self.firstPoint.setX(self.mousePos.p[0])
                     self.firstPoint.setY(self.mousePos.p[1])
@@ -136,15 +152,35 @@ class EventManager:
 
             elif(self.currentState == "Line_created"):
 
-                self.lastPoint.setX(self.mousePos.p[0])
-                self.lastPoint.setY(self.mousePos.p[1])
+                if(self.changeAngle==True and self.changeLength==True):
+                    self.lastPoint.setX(self.firstPoint.getX()+int(float(self.inputLength)*math.cos(math.radians(float(self.inputAngle)))))
+                    self.lastPoint.setY(self.firstPoint.getY()+int(float(self.inputLength)*math.sin(math.radians(float(self.inputAngle)))))
+                elif(self.changeAngle==True):
+                    distance=self.firstPoint.computeEuclideanDistance(self.firstPoint,self.mousePos)
+                    self.lastPoint.setX(self.firstPoint.getX()+int(distance*math.cos(math.radians(float(self.inputAngle)))))
+                    self.lastPoint.setY(self.firstPoint.getY()+int(distance*math.sin(math.radians(float(self.inputAngle)))))
+
+                elif(self.changeLength==True):
+                    angle=self.firstPoint.computeAngleDegrees(self.firstPoint,self.mousePos)
+                    self.lastPoint.setX(self.firstPoint.getX()+int(float(self.inputLength)*math.cos(math.radians(angle))))
+                    self.lastPoint.setY(self.firstPoint.getY()+int(float(self.inputLength)*math.sin(math.radians(angle))))
+
+                else:
+                    self.lastPoint.setX(self.mousePos.p[0])
+                    self.lastPoint.setY(self.mousePos.p[1])
+
                 ###Creating new Link in cartesian way
                 self.objectsInScreen.append(SimpleLink(self.firstPoint.getX(),self.firstPoint.getY(),self.lastPoint.getX(),self.lastPoint.getY()))
                 self.lineCreationProcess.rebootProcess()
+                
                 self.creationMode=False
+                
                 self.hasClicked=False
                 self.clickTabOnce=False
                 self.clickTabTwice=False
+
+                self.changeAngle=False
+                self.changeLength=False
 
 
         return 1
