@@ -33,10 +33,10 @@ class EventManager:
         self.lineCreationProcess=LineCreationProcess()
         self.userInput=None
 
-        self.inputX=""
-        self.inputY=""
-        self.inputAngle=""
-        self.inputLength=""
+        self.inputX="0"
+        self.inputY="0"
+        self.inputAngle="0"
+        self.inputLength="0"
 
         self.currentState=""
 
@@ -95,17 +95,6 @@ class EventManager:
                 self.inputX=str(self.mousePos.getX())
                 self.inputY=self.managing_input_text(event,self.inputY)
                 
-            elif(self.currentState =="Tab_B1_theta"):
-                self.changeAngle=True
-                self.changeLength=False
-                self.inputLength=self.firstPoint.computeEuclideanDistance(self.firstPoint,self.mousePos)
-                self.inputAngle=self.managing_input_text(event,self.inputAngle)
-
-            elif(self.currentState =="Tab_B2_long"):
-                self.changeAngle=False
-                self.changeLength=True
-                self.inputAngle=str(self.firstPoint.computeAngleDegrees(self.firstPoint,self.mousePos))
-                self.inputLength=self.managing_input_text(event,self.inputLength)
 
             elif(self.currentState == "Enter_A3y"):
                 self.changeX=True
@@ -116,6 +105,23 @@ class EventManager:
                 self.changeX=True
                 self.changeY=True
                 self.inputX=self.managing_input_text(event,self.inputX)
+            elif(self.currentState == "FirstPointCreated"):
+                self.inputAngle=str(Point.computeAngleDegrees(self.firstPoint,self.mousePos))
+                self.inputLength=str(Point.computeEuclideanDistance(self.firstPoint,self.mousePos))
+
+            elif(self.currentState =="Tab_B1_theta"):
+                self.changeAngle=True
+                self.changeLength=False
+                
+                self.inputLength=str(Point.computeEuclideanDistance(self.firstPoint,self.mousePos))
+                self.inputAngle=self.managing_input_text(event,self.inputAngle)
+
+            elif(self.currentState =="Tab_B2_long"):
+                self.changeAngle=False
+                self.changeLength=True
+                
+                self.inputAngle=str(Point.computeAngleDegrees(self.firstPoint,self.mousePos))
+                self.inputLength=self.managing_input_text(event,self.inputLength)
                 
             elif(self.currentState == "Enter_B3_long"):
                 self.changeAngle=True
@@ -156,12 +162,12 @@ class EventManager:
                     self.lastPoint.setX(self.firstPoint.getX()+int(float(self.inputLength)*math.cos(math.radians(float(self.inputAngle)))))
                     self.lastPoint.setY(self.firstPoint.getY()+int(float(self.inputLength)*math.sin(math.radians(float(self.inputAngle)))))
                 elif(self.changeAngle==True):
-                    distance=self.firstPoint.computeEuclideanDistance(self.firstPoint,self.mousePos)
+                    distance=Point.computeEuclideanDistance(self.firstPoint,self.mousePos)
                     self.lastPoint.setX(self.firstPoint.getX()+int(distance*math.cos(math.radians(float(self.inputAngle)))))
                     self.lastPoint.setY(self.firstPoint.getY()+int(distance*math.sin(math.radians(float(self.inputAngle)))))
 
                 elif(self.changeLength==True):
-                    angle=self.firstPoint.computeAngleDegrees(self.firstPoint,self.mousePos)
+                    angle=Point.computeAngleDegrees(self.firstPoint,self.mousePos)
                     self.lastPoint.setX(self.firstPoint.getX()+int(float(self.inputLength)*math.cos(math.radians(angle))))
                     self.lastPoint.setY(self.firstPoint.getY()+int(float(self.inputLength)*math.sin(math.radians(angle))))
 
@@ -189,15 +195,25 @@ class EventManager:
         if(event.type == pygame.KEYDOWN):
             if event.key == pygame.K_BACKSPACE and len(text)>0:
                 # get text input from 0 to -1 i.e. end.
+                if(text =="-0"):
+                    return "0"
                 text = text[:-1]
                 if(text== ""):
                     return "0"
             else:
-                if(event.unicode.isnumeric() or (event.unicode == "." and "." not in text)):
-                    if(text == "0"):
+                if(event.unicode.isnumeric() or (event.unicode == "." and "." not in text) or (event.unicode == "-" and "-" not in text) ):
+                    if(text == "0" or text == "-0"):
                         text = text[:-1]
                     text += event.unicode
+        if(text== "-"):
+            text="-0"
         return text
+    
+    def getAngle(self):
+        return float(self.inputAngle) if (len(self.inputAngle)>0 and self.inputAngle!="-") else 0.0
+    
+    def getLength(self):
+        return float(self.inputLength) if (len(self.inputLength)>0 and self.inputLength!="-") else 0.0
 
 
 
@@ -323,12 +339,12 @@ class LineCreationProcess:
 
         stageB4.setFlag("Enter_B3_long")
         stageB4.addOutputStage("Tab_Pressed",stageB2)
-        stageB4.addOutputStage("Enter_Pressed",stageB5)
+        stageB4.addOutputStage("Enter_Pressed",stageFinalClick)
         stageB4.addOutputStage("LClick",stageFinalClick)
 
         stageB5.setFlag("Enter_B4_theta")
-        stageB5.addOutputStage("Tab_Pressed",stageB2)
-        stageB5.addOutputStage("Enter_Pressed",stageB5)
+        stageB5.addOutputStage("Tab_Pressed",stageB3)
+        stageB5.addOutputStage("Enter_Pressed",stageFinalClick)
         stageB5.addOutputStage("LClick",stageFinalClick)
 
         stageFinalClick.setFlag("Line_created")

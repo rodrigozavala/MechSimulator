@@ -40,6 +40,8 @@ myCursor=Cursor(0,0,pygame,screen)
 
 phantomCursor=Cursor(0,0,pygame,screen)
 
+auxPoint=Point(0,0)
+
 ##############################Buttons and Buttons characteristics 
 UIbuttonCreate= UIButton("Create New Link")
 
@@ -63,7 +65,7 @@ inputRectangleY=UIInputTextBar(40,150).setPosX(inputRectangleX.getPosX()+inputRe
 
 inputRectangleTheta=UIInputTextBar(40,150).setPosX(inputRectangleY.getPosX()+inputRectangleY.getWidth()).setPosY(size[1]-75)
 
-inputRectangleLong=UIInputTextBar(40,150).setPosX(inputRectangleTheta.getPosX()+inputRectangleTheta.getWidth()).setPosY(size[1]-75)
+inputRectangleLong=UIInputTextBar(40,150).setPosX(inputRectangleTheta.getPosX()+inputRectangleTheta.getWidth()).setPosY(size[1]-125)
 
 
 angle_text=""
@@ -118,30 +120,84 @@ while True:
         if(myEvents.currentState in ["FirstPointCreated","Tab_B1_theta","Tab_B2_long","Enter_B3_long","Enter_B4_theta"] ):
             if(myEvents.currentState == "FirstPointCreated" ):
                 distanceBetweenPoints=Point.computeEuclideanDistance( myEvents.firstPoint,myEvents.mousePos)
+                
                 pygame.draw.line(screen,Color.BLACK.colorCode,myEvents.firstPoint.p,myEvents.mousePos.p,1)
                 pygame.draw.circle(screen,Color.BLACK.colorCode,myEvents.firstPoint.p,distanceBetweenPoints,1)
 
                 textToDisplay=str(distanceBetweenPoints)
-
                 textSurface=fontButtons.render(textToDisplay,True,Color.BLACK.colorCode)
                 screen.blit(textSurface,myEvents.firstPoint.p+Point.computeMiddlePoint(myEvents.mousePos,myEvents.firstPoint).p)
+                
                 phantomCursor.position.setX(0)
                 phantomCursor.position.setY(0)
 
+                inputRectangleTheta.setInputText(str(Point.computeAngleDegrees(myEvents.firstPoint,myEvents.mousePos)))
+                inputRectangleTheta.showInputText(screen,fontInput)
+
+                inputRectangleLong.setInputText(str(Point.computeEuclideanDistance(myEvents.firstPoint,myEvents.mousePos)))
+                inputRectangleLong.showInputText(screen,fontInput)
+
 
             elif(myEvents.currentState == "Tab_B1_theta" ):
-                inputRectangleTheta.setInputText(str(str(myEvents.firstPoint.computeAngleDegrees(myEvents.firstPoint,myEvents.mousePos))))
+                inputRectangleLong.setInputText(str(Point.computeEuclideanDistance(myEvents.firstPoint,myEvents.mousePos)))
+                inputRectangleLong.showInputText(screen,fontInput)
+
+
+                inputRectangleTheta.setInputText(myEvents.inputAngle)
+                inputRectangleTheta.showInputText(screen,fontInput)
+                
+                
+                
+                auxPoint.setX(myEvents.firstPoint.getX()+int(float(inputRectangleLong.getInputText())*math.cos(math.radians(myEvents.getAngle()))))
+                auxPoint.setY(myEvents.firstPoint.getY()+int(float(inputRectangleLong.getInputText())*math.sin(math.radians(myEvents.getAngle()))))
+
+                pygame.draw.line(screen,Color.BLACK.colorCode,myEvents.firstPoint.p,auxPoint.p,1)
+                pygame.draw.circle(screen,Color.BLACK.colorCode,myEvents.firstPoint.p,float(inputRectangleLong.getInputText()),1)
+                
             
-                pass
+                
             elif(myEvents.currentState == "Enter_B4_theta"):
 
-                pass
+                inputRectangleTheta.setInputText(myEvents.inputAngle)
+                inputRectangleTheta.showInputText(screen,fontInput)
+
+                auxPoint.setX(myEvents.firstPoint.getX()+int(float(inputRectangleLong.getInputText())*math.cos(math.radians(myEvents.getAngle()))))
+                auxPoint.setY(myEvents.firstPoint.getY()+int(float(inputRectangleLong.getInputText())*math.sin(math.radians(myEvents.getAngle()))))
+
+                pygame.draw.line(screen,Color.BLACK.colorCode,myEvents.firstPoint.p,auxPoint.p,1)
+                pygame.draw.circle(screen,Color.BLACK.colorCode,myEvents.firstPoint.p,float(inputRectangleLong.getInputText()),1)
+                
+
+                
             elif(myEvents.currentState == "Tab_B2_long"):
+                inputRectangleTheta.setInputText(str(Point.computeAngleDegrees(myEvents.firstPoint,myEvents.mousePos)))
+                inputRectangleTheta.showInputText(screen,fontInput)
 
-                pass
+                inputRectangleLong.setInputText(myEvents.inputLength)
+                inputRectangleLong.showInputText(screen,fontInput)
+
+                
+                auxPoint.setX(myEvents.firstPoint.getX()+int(myEvents.getLength()*math.cos(math.radians(float(inputRectangleTheta.getInputText())))))
+                auxPoint.setY(myEvents.firstPoint.getY()+int(myEvents.getLength()*math.sin(math.radians(float(inputRectangleTheta.getInputText())))))
+
+                pygame.draw.line(screen,Color.BLACK.colorCode,myEvents.firstPoint.p,auxPoint.p,1)
+                pygame.draw.circle(screen,Color.BLACK.colorCode,myEvents.firstPoint.p,myEvents.getLength(),1)
+                
+
+                
             elif(myEvents.currentState == "Enter_B3_long"):
+                #inputRectangleTheta.setInputText(str(Point.computeAngleDegrees(myEvents.firstPoint,myEvents.mousePos)))
+                #inputRectangleTheta.showInputText(screen,fontInput)
+                inputRectangleLong.setInputText(myEvents.inputLength)
+                inputRectangleLong.showInputText(screen,fontInput)
 
-                pass
+                auxPoint.setX(myEvents.firstPoint.getX()+int(float(myEvents.inputLength)*math.cos(math.radians(float(inputRectangleTheta.getInputText())))))
+                auxPoint.setY(myEvents.firstPoint.getY()+int(float(myEvents.inputLength)*math.sin(math.radians(float(inputRectangleTheta.getInputText())))))
+
+                pygame.draw.line(screen,Color.BLACK.colorCode,myEvents.firstPoint.p,auxPoint.p,1)
+                pygame.draw.circle(screen,Color.BLACK.colorCode,myEvents.firstPoint.p,float(inputRectangleLong.getInputText()),1)
+
+                
         if(myEvents.currentState =="CreationModeButtonPressed"):
             inputRectangleX.setInputText(str(myEvents.mousePos.getX()))
             inputRectangleY.setInputText(str(myEvents.mousePos.getY()))
