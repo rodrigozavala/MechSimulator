@@ -2,9 +2,11 @@ from links import Point,SimpleLink
 import pygame_gui
 import pygame, sys
 import math
-
+from Color import Color
+from processes import Process, Stage
 LEFT=1
 RIGHT=3
+
 class EventManager:
     def __init__(self,UIElements,objectsInScreen):
         #self.__events=events
@@ -217,70 +219,6 @@ class EventManager:
 
 
 
-class Stage:
-    def __init__(self,output_stages=None,flag=None):
-        if(output_stages == None):
-            self.output_stages={}
-        else:
-            self.output_stages=output_stages
-        self.flag=flag
-
-    def addOutputStage(self,input,stage):
-        self.output_stages[input]=stage
-
-    def validateInput(self,input):
-        if (input in self.output_stages.keys()):
-            return self.output_stages[input]
-        else:
-            return self
-    
-    def getFlag(self):
-        return self.flag
-
-    def setFlag(self,flag):
-        self.flag=flag
-
-class Process:
-    def __init__(self):
-        self.stages=[]
-        self.initialStage=None
-        self.finalStage=None
-        self.currentStage=None
-        self.nextProcess=None
-
-    
-    def addStage(self,stage):
-        self.stages.append(stage)
-
-    def setInitialStage(self,stage):
-        self.initialStage=stage
-        self.currentStage=stage
-
-    def getInitialState(self):
-        return self.initialStage
-
-    def setCurrentStage(self,stage):
-        self.currentStage=stage
-
-    def getCurrentStage(self):
-        return self.currentStage
-    
-    def setFinalStage(self,stage):
-        self.finalStage=stage
-
-    def setNextProcess(self,process):
-        self.nextProcess=process
-    
-    def updateStage(self,input):
-        self.currentStage=self.currentStage.validateInput(input)
-
-    def getCurrentStageFlag(self):
-        return self.currentStage.getFlag()
-    
-    def rebbot(self):
-        self.currentStage=self.initialStage
-    
-
 class LineCreationProcess:
     def __init__(self):
         self.creationProcess=Process()
@@ -372,3 +310,141 @@ class LineCreationProcess:
     
     def rebootProcess(self):
         self.creationProcess.rebbot()
+
+
+
+class CreationModeLogic:
+    def __init__(self, Fonts, UIElements):
+        self.UIFonts=Fonts
+        self.UIElements = UIElements
+        pass
+
+    def creation_mode_logic(self,screen,events,pygame):
+        if(events.creationMode==True):
+            if(events.currentState in ["FirstPointCreated","Tab_B1_theta","Tab_B2_long","Enter_B3_long","Enter_B4_theta"] ):
+                if(events.currentState == "FirstPointCreated" ):
+                    distanceBetweenPoints=Point.computeEuclideanDistance( events.firstPoint,events.mousePos)
+                    
+                    pygame.draw.line(screen,Color.BLACK.colorCode,events.firstPoint.p,events.mousePos.p,1)
+                    pygame.draw.circle(screen,Color.BLACK.colorCode,events.firstPoint.p,distanceBetweenPoints,1)
+
+                    textToDisplay=str(distanceBetweenPoints)
+                    textSurface=self.UIFonts["fontButtons"].render(textToDisplay,True,Color.BLACK.colorCode)
+                    screen.blit(textSurface,events.firstPoint.p+Point.computeMiddlePoint(events.mousePos,events.firstPoint).p)
+                    
+                    self.UIElements["aux"]["phantomCursor"].position.setX(0)
+                    self.UIElements["aux"]["phantomCursor"].position.setY(0)
+
+                    self.UIElements["keyInputs"]["thetaInput"].setInputText(str(Point.computeAngleDegrees(events.firstPoint,events.mousePos)))
+                    self.UIElements["keyInputs"]["thetaInput"].showInputText(screen,self.UIFonts["fontInput"])
+
+                    self.UIElements["keyInputs"]["longInput"].setInputText(str(Point.computeEuclideanDistance(events.firstPoint,events.mousePos)))
+                    self.UIElements["keyInputs"]["longInput"].showInputText(screen,self.UIFonts["fontInput"])
+                    
+
+
+                elif(events.currentState == "Tab_B1_theta" ):
+                    self.UIElements["keyInputs"]["longInput"].setInputText(str(Point.computeEuclideanDistance(events.firstPoint,events.mousePos)))
+                    self.UIElements["keyInputs"]["longInput"].showInputText(screen,self.UIFonts["fontInput"])
+
+                    self.UIElements["keyInputs"]["thetaInput"].setInputText(events.inputAngle)
+                    self.UIElements["keyInputs"]["thetaInput"].showInputText(screen,self.UIFonts["fontInput"])
+                    
+                    
+                    self.UIElements["aux"]["auxPoint"].setX(events.firstPoint.getX()+int(float(self.UIElements["keyInputs"]["longInput"].getInputText())*math.cos(math.radians(events.getAngle()))))
+                    self.UIElements["aux"]["auxPoint"].setY(events.firstPoint.getY()+int(float(self.UIElements["keyInputs"]["longInput"].getInputText())*math.sin(math.radians(events.getAngle()))))
+
+                    pygame.draw.line(screen,Color.BLACK.colorCode,events.firstPoint.p,self.UIElements["aux"]["auxPoint"].p,1)
+                    pygame.draw.circle(screen,Color.BLACK.colorCode,events.firstPoint.p,float(self.UIElements["keyInputs"]["longInput"].getInputText()),1)
+                    
+                
+                    
+                elif(events.currentState == "Enter_B4_theta"):
+
+                    self.UIElements["keyInputs"]["thetaInput"].setInputText(events.inputAngle)
+                    self.UIElements["keyInputs"]["thetaInput"].showInputText(screen,self.UIFonts["fontInput"])
+
+                    self.UIElements["aux"]["auxPoint"].setX(events.firstPoint.getX()+int(float(self.UIElements["keyInputs"]["longInput"].getInputText())*math.cos(math.radians(events.getAngle()))))
+                    self.UIElements["aux"]["auxPoint"].setY(events.firstPoint.getY()+int(float(self.UIElements["keyInputs"]["longInput"].getInputText())*math.sin(math.radians(events.getAngle()))))
+
+                    pygame.draw.line(screen,Color.BLACK.colorCode,events.firstPoint.p,self.UIElements["aux"]["auxPoint"].p,1)
+                    pygame.draw.circle(screen,Color.BLACK.colorCode,events.firstPoint.p,float(self.UIElements["keyInputs"]["longInput"].getInputText()),1)
+                    
+
+                    
+                elif(events.currentState == "Tab_B2_long"):
+                    self.UIElements["keyInputs"]["thetaInput"].setInputText(str(Point.computeAngleDegrees(events.firstPoint,events.mousePos)))
+                    self.UIElements["keyInputs"]["thetaInput"].showInputText(screen,self.UIFonts["fontInput"])
+
+                    self.UIElements["keyInputs"]["longInput"].setInputText(events.inputLength)
+                    self.UIElements["keyInputs"]["longInput"].showInputText(screen,self.UIFonts["fontInput"])
+
+                    
+                    self.UIElements["aux"]["auxPoint"].setX(events.firstPoint.getX()+int(events.getLength()*math.cos(math.radians(float(self.UIElements["keyInputs"]["thetaInput"].getInputText())))))
+                    self.UIElements["aux"]["auxPoint"].setY(events.firstPoint.getY()+int(events.getLength()*math.sin(math.radians(float(self.UIElements["keyInputs"]["thetaInput"].getInputText())))))
+
+                    pygame.draw.line(screen,Color.BLACK.colorCode,events.firstPoint.p,self.UIElements["aux"]["auxPoint"].p,1)
+                    pygame.draw.circle(screen,Color.BLACK.colorCode,events.firstPoint.p,events.getLength(),1)
+                    
+
+                    
+                elif(events.currentState == "Enter_B3_long"):
+                    self.UIElements["keyInputs"]["longInput"].setInputText(events.inputLength)
+                    self.UIElements["keyInputs"]["longInput"].showInputText(screen,self.UIFonts["fontInput"])
+
+                    self.UIElements["aux"]["auxPoint"].setX(events.firstPoint.getX()+int(float(events.inputLength)*math.cos(math.radians(float(self.UIElements["keyInputs"]["thetaInput"].getInputText())))))
+                    self.UIElements["aux"]["auxPoint"].setY(events.firstPoint.getY()+int(float(events.inputLength)*math.sin(math.radians(float(self.UIElements["keyInputs"]["thetaInput"].getInputText())))))
+
+                    pygame.draw.line(screen,Color.BLACK.colorCode,events.firstPoint.p,self.UIElements["aux"]["auxPoint"].p,1)
+                    pygame.draw.circle(screen,Color.BLACK.colorCode,events.firstPoint.p,float(self.UIElements["keyInputs"]["longInput"].getInputText()),1)
+
+                    
+            if(events.currentState =="CreationModeButtonPressed"):
+                self.UIElements["keyInputs"]["xInput"].setInputText(str(events.mousePos.getX()))
+                self.UIElements["keyInputs"]["yInput"].setInputText(str(events.mousePos.getY()))
+                
+
+
+            elif(events.currentState == "Tab_A1x"):
+                self.UIElements["keyInputs"]["yInput"].setInputText(str(events.mousePos.getY()))
+
+                self.UIElements["aux"]["phantomCursor"].draw(int(self.UIElements["keyInputs"]["xInput"].getInputText()),events.mousePos.p[1])
+                
+                #Shows vertical line
+                pygame.draw.line(screen,Color.BLACK.colorCode,[int(self.UIElements["keyInputs"]["xInput"].getInputText()),0],[int(self.UIElements["keyInputs"]["xInput"].getInputText()),10000],1)
+                self.UIElements["keyInputs"]["xInput"].setInputText(events.inputX)
+                self.UIElements["keyInputs"]["xInput"].showInputText(screen,self.UIFonts["fontInput"])
+
+            elif(events.currentState == "Enter_A3y"):
+                self.UIElements["keyInputs"]["xInput"].setInputText(events.inputX)
+                self.UIElements["keyInputs"]["xInput"].showInputText(screen,self.UIFonts["fontInput"])
+
+                self.UIElements["aux"]["phantomCursor"].draw(int(self.UIElements["keyInputs"]["xInput"].getInputText()),int(self.UIElements["keyInputs"]["yInput"].getInputText()))
+                
+                pygame.draw.line(screen,Color.BLACK.colorCode,[0,int(self.UIElements["keyInputs"]["yInput"].getInputText())],[10000,int(self.UIElements["keyInputs"]["yInput"].getInputText())],1)
+                self.UIElements["keyInputs"]["yInput"].setInputText(events.inputY)
+                self.UIElements["keyInputs"]["yInput"].showInputText(screen,self.UIFonts["fontInput"])
+                
+            elif(events.currentState == "Tab_A2y"):
+                self.UIElements["keyInputs"]["xInput"].setInputText(str(events.mousePos.getX()))
+                self.UIElements["aux"]["phantomCursor"].draw(events.mousePos.p[0],int(self.UIElements["keyInputs"]["yInput"].getInputText()))
+                
+                #Shows horizontal line
+                pygame.draw.line(screen,Color.BLACK.colorCode,[0,int(self.UIElements["keyInputs"]["yInput"].getInputText())],[10000,int(self.UIElements["keyInputs"]["yInput"].getInputText())],1)
+                self.UIElements["keyInputs"]["yInput"].setInputText(events.inputY)
+                self.UIElements["keyInputs"]["yInput"].showInputText(screen,self.UIFonts["fontInput"])
+
+            elif(events.currentState == "Enter_A4x"):
+                self.UIElements["keyInputs"]["yInput"].setInputText(events.inputY)
+                self.UIElements["keyInputs"]["yInput"].showInputText(screen,self.UIFonts["fontInput"])
+
+                self.UIElements["aux"]["phantomCursor"].draw(int(self.UIElements["keyInputs"]["xInput"].getInputText()),int(self.UIElements["keyInputs"]["yInput"].getInputText()))
+
+                pygame.draw.line(screen,Color.BLACK.colorCode,[int(self.UIElements["keyInputs"]["xInput"].getInputText()),0],[int(self.UIElements["keyInputs"]["xInput"].getInputText()),10000],1)
+                self.UIElements["keyInputs"]["xInput"].setInputText(events.inputX)
+                self.UIElements["keyInputs"]["xInput"].showInputText(screen,self.UIFonts["fontInput"])
+            
+            else:
+
+                pass
+        pass
