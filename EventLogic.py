@@ -1,4 +1,5 @@
-from links import Point,SimpleLink
+from links import SimpleLink
+from geometric_objects import Point
 import pygame_gui
 import pygame, sys
 import math
@@ -178,7 +179,9 @@ class EventManager:
                     self.lastPoint.setY(self.mousePos.p[1])
 
                 ###Creating new Link in cartesian way
+                
                 self.objectsInScreen.append(SimpleLink(self.firstPoint.getX(),self.firstPoint.getY(),self.lastPoint.getX(),self.lastPoint.getY()))
+                #self.objectsInScreen.append()
                 self.lineCreationProcess.rebootProcess()
                 
                 self.creationMode=False
@@ -402,8 +405,6 @@ class CreationModeLogic:
             if(events.currentState =="CreationModeButtonPressed"):
                 self.UIElements["keyInputs"]["xInput"].setInputText(str(events.mousePos.getX()))
                 self.UIElements["keyInputs"]["yInput"].setInputText(str(events.mousePos.getY()))
-                
-
 
             elif(events.currentState == "Tab_A1x"):
                 self.UIElements["keyInputs"]["yInput"].setInputText(str(events.mousePos.getY()))

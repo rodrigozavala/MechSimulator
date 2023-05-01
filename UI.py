@@ -4,7 +4,8 @@ import numpy as np
 import sympy as sym
 import math
 import matplotlib.pyplot as plt
-from links import Point,SimpleLink
+from links import SimpleLink, Joint
+from geometric_objects import Point
 from UIElements import UIButton, UIVariables, UIInputTextBar, Cursor
 from EventLogic import EventManager, CreationModeLogic
 from Color import Color
@@ -77,20 +78,15 @@ UIElementsDict["keyInputs"]={"xInput":inputRectangleX,"yInput":inputRectangleY,
 angle_text=""
 user_text=""
 
-#user_textX=""
-#user_textY=""
-#user_textAngle=""
-#user_textLenght=""
 
 clock=pygame.time.Clock()
     
 
 myEvents=EventManager(UIElementsDict,objectsInScreen)
-
+cml=CreationModeLogic(UIFontsDict,UIElementsDict)
 
 while True:
     time_delta=clock.tick(60)/1000.0
-
     
     for event in pygame.event.get():
         result=myEvents.manageEvents(event)
@@ -99,8 +95,6 @@ while True:
             break
 
         manager.process_events(event)
-
-    
 
     #To fill screen background color
     screen.fill(Color.LIGHT_GRAY.colorCode)
@@ -123,14 +117,18 @@ while True:
     inputRectangleTheta.showInputText(screen,fontInput)
     inputRectangleLong.showInputText(screen,fontInput)
 
-    cml=CreationModeLogic(UIFontsDict,UIElementsDict)
+    #Logic of different modes
+    
     cml.creation_mode_logic(screen,myEvents,pygame)
         
     #######################Animation to show all links
 
+    myJoint=Joint(300,300)
+    myJoint.currentState="Warning"
     for link in myEvents.objectsInScreen:
-        pygame.draw.line(screen,Color.BLACK.colorCode,link.p0.p,link.pf.p,5)
+        link.draw(pygame,screen)
 
+    myJoint.draw(pygame,screen)
     #############################Update screen
     ##This let me show a blue and a red axis
 
@@ -141,6 +139,3 @@ while True:
     pygame.display.update()
     
     #time.sleep(1/30)
-
-
-

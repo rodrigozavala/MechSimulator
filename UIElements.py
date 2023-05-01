@@ -1,6 +1,6 @@
 
 from Color import Color
-from links import Point
+from geometric_objects import Point
 #class UIVariablesMeta:
 #    _instances={}
 #    def __call__(self, *args,**kwds):
@@ -140,3 +140,52 @@ class Cursor:
             self.setPosition(x,y)
         self.pygame.draw.line(self.screen,Color.BLACK.colorCode,self.initH.p,self.endH.p,self.width)
         self.pygame.draw.line(self.screen,Color.BLACK.colorCode,self.initV.p,self.endV.p,self.width)
+
+
+
+class GraphicalRepresentation:
+    def __init__(self,standarColor,interactionColor,warningColor):
+        self.standardColor=standarColor
+        self.interactionColor=interactionColor
+        self.warningColor=warningColor
+        self.currentColor=self.standardColor
+
+    def drawItself(self,pygame,screen,objectState):
+        self.currentColor=self.standardColor
+        if(objectState == "Warning"):
+            self.currentColor=self.warningColor
+        elif(objectState == "Interaction"):
+            self.currentColor=self.interactionColor
+
+
+class SimpleLinkGR(GraphicalRepresentation):
+    def __init__(self,p0,pf):
+        self.standardColor=Color.BLACK.colorCode
+        self.interactionColor=Color.GREEN.colorCode
+        self.warningColor=Color.YELLOW.colorCode
+        self.p0=p0
+        self.pf=pf
+        self.width=5
+        GraphicalRepresentation.__init__(self,self.standardColor,self.interactionColor,self.warningColor)
+
+
+    def drawItself(self, pygame, screen, objectState):
+        super().drawItself(screen,pygame,objectState)
+        pygame.draw.line(screen,self.currentColor,self.p0,self.pf,self.width)
+        #return super().draw(screen, pygame, objectState)
+
+class JointGR(GraphicalRepresentation):
+    def __init__(self,p):
+        self.standardColor=Color.BLACK.colorCode
+        self.interactionColor=Color.GREEN.colorCode
+        self.warningColor=Color.YELLOW.colorCode
+        self.p=p
+        GraphicalRepresentation.__init__(self,self.standardColor,self.interactionColor,self.warningColor)
+
+    def drawItself(self, pygame, screen, objectState):
+        super().drawItself(pygame, screen, objectState)
+        #pygame.draw.ellipse(screen, self.currentColor, [self.p[0], self.p[1], 8, 8])
+        pygame.draw.circle(screen,self.currentColor,self.p,10,2)
+        pygame.draw.circle(screen,self.currentColor,self.p,4)
+        
+        
