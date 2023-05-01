@@ -57,11 +57,15 @@ UIbuttonSave=UIButton("Save")
 UIbuttonSave.setHeight(75).setWidth(150).setPosX(
     UIbuttonSave.getPosX()+UIbuttonSave.getWidth()).setPosY(screen.get_size()[1]-UIbuttonCreate.getHeight())
 
+UIButtonEdit= UIButton("Edit")
+UIButtonEdit.setHeight(75).setWidth(150).setPosX(UIbuttonSave.getPosX()).setPosY(UIbuttonCreate.getPosY()-UIbuttonCreate.getHeight())
+
 buttonCreate=UIbuttonCreate.showButton()
 buttonSave=UIbuttonSave.showButton()
+buttonEdit=UIButtonEdit.showButton()
 
 
-UIElementsDict["buttons"]={"create":buttonCreate,"save":buttonSave}
+UIElementsDict["buttons"]={"create":buttonCreate,"save":buttonSave,"edit":buttonEdit}
 #####################Input text
 
 inputRectangleX=UIInputTextBar(40,150).setPosX(UIbuttonSave.getPosX()+UIbuttonSave.getWidth()).setPosY(size[1]-75)

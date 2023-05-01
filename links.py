@@ -78,9 +78,13 @@ class Joint:
         self.point=Point(x,y)
         self.gR= JointGR(self.point.p)
         self.currentState="Standard"
+        self.isGrounded=False
 
     def draw(self,pygame,screen):
         self.gR.drawItself(pygame,screen,self.getCurrentState())
+
+    def addLink(self,link):
+        self.links.append(link)
 
     def getX(self):
         return self.point.getX()
@@ -97,5 +101,18 @@ class Joint:
     def setCurrentState(self,currentState):
         self.currentState=currentState
 
+    def updateCurrentState(self,mousePos=None):
+        if (len(self.links)<2 and self.isGrounded==False):
+            self.currentState="Warning"
+            if(mousePos !=None):
+                if(self.checkMouseHovering(mousePos)):
+                    self.currentState="Interaction"
+        else:
+            self.currentState="Standard"
 
+
+    def checkMouseHovering(self,mousePos):
+        if(Point.computeEuclideanDistance(mousePos,self.point)<=10):
+            return True
+        return False
     

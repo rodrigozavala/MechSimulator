@@ -1,4 +1,4 @@
-from links import SimpleLink
+from links import SimpleLink,Joint
 from geometric_objects import Point
 import pygame_gui
 import pygame, sys
@@ -14,7 +14,9 @@ class EventManager:
         self.firstPoint=Point(0,0)
         self.lastPoint=Point(0,0)
         self.mousePos=Point(0,0)
+
         self.creationMode=False
+        self.editMode=False
         
         self.hasClicked=False
 
@@ -31,10 +33,10 @@ class EventManager:
         self.changeAngle=False
         self.changeLength=False
 
-
-
         self.lineCreationProcess=LineCreationProcess()
         self.userInput=None
+        self.createdOverJoint=None
+        self.endedOverJoint=None
 
         self.inputX="0"
         self.inputY="0"
@@ -48,6 +50,7 @@ class EventManager:
         if("pos" in event.__dict__.keys()):
             self.mousePos.setX(event.__dict__["pos"][0])
             self.mousePos.setY(event.__dict__["pos"][1])
+            self.checkMouseHovering(self.mousePos)
             
         if(event.type==pygame.QUIT):
             sys.exit()
@@ -57,11 +60,17 @@ class EventManager:
             if(event.ui_element == self.UIElements["buttons"]["create"]):##buttonCreate was pressed
                 ###set creation mode
                 self.creationMode=True
+            elif(event.ui_element == self.UIElements["buttons"]["edit"]):
+                if(self.editMode==True):
+                    self.editMode=False
+                else:
+                    self.editMode=True
             else:
                 pass
         ##################################################### Check Modes
 
         elif(self.creationMode):##creationMode is set True
+            self.editMode=False
             #Parse user action into inputs
             if(event.type == pygame.MOUSEBUTTONDOWN and event.button == LEFT):
                 self.userInput="LClick"
@@ -137,6 +146,7 @@ class EventManager:
                 
             if(self.currentState == "FirstPointCreated" and self.hasClicked==False):
 
+
                 if(self.changeX==True and self.changeY==True):
                     self.firstPoint.setX(int(self.inputX))
                     self.firstPoint.setY(int(self.inputY))
@@ -149,8 +159,10 @@ class EventManager:
                     self.firstPoint.setY(int(self.inputY))
 
                 else:
-                    self.firstPoint.setX(self.mousePos.p[0])
-                    self.firstPoint.setY(self.mousePos.p[1])
+                    self.createdOverJoint=self.createPointOverJointIfMouseHoversOverIt()
+                    if(self.createdOverJoint==None):
+                        self.firstPoint.setX(self.mousePos.p[0])
+                        self.firstPoint.setY(self.mousePos.p[1])
                 
                 self.hasClicked=True
                 self.clickTabOnce=False
@@ -175,12 +187,28 @@ class EventManager:
                     self.lastPoint.setY(self.firstPoint.getY()+int(float(self.inputLength)*math.sin(math.radians(angle))))
 
                 else:
-                    self.lastPoint.setX(self.mousePos.p[0])
-                    self.lastPoint.setY(self.mousePos.p[1])
+                    self.endedOverJoint=self.endPointOverJointIfMouseHoversOverIt()
+                    if(self.endedOverJoint==None):
+                        self.lastPoint.setX(self.mousePos.p[0])
+                        self.lastPoint.setY(self.mousePos.p[1])
 
                 ###Creating new Link in cartesian way
-                
-                self.objectsInScreen.append(SimpleLink(self.firstPoint.getX(),self.firstPoint.getY(),self.lastPoint.getX(),self.lastPoint.getY()))
+                createdLink=SimpleLink(self.firstPoint.getX(),self.firstPoint.getY(),self.lastPoint.getX(),self.lastPoint.getY())
+                firstJoint=Joint(self.firstPoint.getX(),self.firstPoint.getY(),[createdLink])
+                lastJoint=Joint(self.lastPoint.getX(),self.lastPoint.getY(),[createdLink])
+                self.objectsInScreen.append(createdLink)
+
+                if(self.endedOverJoint==None):
+                    self.objectsInScreen.append(lastJoint)
+                else:
+                    self.endedOverJoint.addLink(createdLink)
+
+                if(self.createdOverJoint==None):
+                    self.objectsInScreen.append(firstJoint)
+                else:
+                    self.createdOverJoint.addLink(createdLink)
+
+
                 #self.objectsInScreen.append()
                 self.lineCreationProcess.rebootProcess()
                 
@@ -192,6 +220,16 @@ class EventManager:
 
                 self.changeAngle=False
                 self.changeLength=False
+
+        elif(self.editMode):
+            self.creationMode=False
+
+            ##[Insert: Logic of edit mode]
+            #self.editMode=False
+            pass
+        else:
+            pass
+
 
 
         return 1
@@ -213,6 +251,33 @@ class EventManager:
         if(text== "-"):
             text="-0"
         return text
+    
+    def checkMouseHovering(self,mouse):
+        for element in self.objectsInScreen:
+            if(isinstance(element,Joint)):
+                if(self.editMode==True or self.creationMode==True):
+                    element.updateCurrentState(mouse)
+                else:
+                    element.updateCurrentState()
+
+    def createPointOverJointIfMouseHoversOverIt(self):
+        for element in self.objectsInScreen:
+            if(isinstance(element,Joint)):
+                if(element.checkMouseHovering(self.mousePos)==True):
+                    self.firstPoint.setX(element.getX())
+                    self.firstPoint.setY(element.getY())
+                    return element
+        return None
+    
+
+    def endPointOverJointIfMouseHoversOverIt(self):
+        for element in self.objectsInScreen:
+            if(isinstance(element,Joint)):
+                if(element.checkMouseHovering(self.mousePos)==True):
+                    self.lastPoint.setX(element.getX())
+                    self.lastPoint.setY(element.getY())
+                    return element
+        return None
     
     def getAngle(self):
         return float(self.inputAngle) if (len(self.inputAngle)>0 and self.inputAngle!="-") else 0.0
