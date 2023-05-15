@@ -172,6 +172,7 @@ class SimpleLinkGR(GraphicalRepresentation):
     def drawItself(self, pygame, screen, objectState):
         super().drawItself(screen,pygame,objectState)
         pygame.draw.line(screen,self.currentColor,self.p0,self.pf,self.width)
+        
         #return super().draw(screen, pygame, objectState)
 
 class JointGR(GraphicalRepresentation):

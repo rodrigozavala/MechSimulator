@@ -126,5 +126,9 @@ class Line:
     
     def getPFCoodinates(self):
         return self.pf.p
-
     
+    def getThetaRadians(self):
+        return Point.computeAngleRadians(self.p0,self.pf)
+    
+    def getThetaDegrees(self):
+        return Point.computeAngleDegrees(self.p0,self.pf)

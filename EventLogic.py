@@ -254,11 +254,12 @@ class EventManager:
     
     def checkMouseHovering(self,mouse):
         for element in self.objectsInScreen:
-            if(isinstance(element,Joint)):
+            if(isinstance(element,Joint) or isinstance(element,SimpleLink)):
                 if(self.editMode==True or self.creationMode==True):
                     element.updateCurrentState(mouse)
                 else:
                     element.updateCurrentState()
+
 
     def createPointOverJointIfMouseHoversOverIt(self):
         for element in self.objectsInScreen:
