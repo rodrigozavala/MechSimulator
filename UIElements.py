@@ -1,6 +1,9 @@
 
 from Color import Color
+import pygame
+import numpy as np
 from geometric_objects import Point
+import math
 #class UIVariablesMeta:
 #    _instances={}
 #    def __call__(self, *args,**kwds):
@@ -189,4 +192,46 @@ class JointGR(GraphicalRepresentation):
         pygame.draw.circle(screen,self.currentColor,self.p,10,2)
         pygame.draw.circle(screen,self.currentColor,self.p,4)
         
+
+
+class TransJointGR(GraphicalRepresentation):
+    def __init__(self,p0,pf):
+        self.standardColor=Color.BLACK.colorCode
+        self.interactionColor=Color.GREEN.colorCode
+        self.warningColor=Color.YELLOW.colorCode
+        self.p0=p0
+        self.pf=pf
+        self.unitImageWidth=20
+        self.unitImageHeight=10
+        self.width=5
+        GraphicalRepresentation.__init__(self,self.standardColor,self.interactionColor,self.warningColor)
+        
+        theta=Point.computeAngleRadians(self.p0,self.pf)
+        thetaAngle=Point.computeAngleDegrees(self.p0,self.pf)
+
+        self.img= pygame.transform.scale(pygame.image.load("Images/1dJoint.png").convert_alpha(),(self.unitImageWidth,self.unitImageHeight))
+        self.img=pygame.transform.rotate(self.img,-thetaAngle)
+
+        self.lineLength=Point.computeEuclideanDistance(self.p0,self.pf)
+        self.numberUnits=int(self.lineLength/self.unitImageWidth)
+
+        
+
+        if(thetaAngle==90 or thetaAngle==270 or thetaAngle== -90 or thetaAngle== -270):
+            self.points=[[self.p0.getX(),self.p0.getY()+i*self.lineLength/self.numberUnits] for i in range(1,self.numberUnits+1)]
+        else:
+            b=(p0.getY()-math.tan(theta)*p0.getX())
+            m=math.tan(theta)
+            self.points=[np.array([1,m])*i*self.lineLength*math.cos(theta)/(self.numberUnits)+np.array([0+self.p0.getX(),b+self.p0.getY()]) for i in range(1,self.numberUnits+1)]
+        
+        
+        
+    
+    def drawItself(self, pygame, screen, objectState):
+        super().drawItself(pygame, screen, objectState)
+        #pygame.draw.ellipse(screen, self.currentColor, [self.p[0], self.p[1], 8, 8])
+        for p in self.points:
+            screen.blit(self.img,p)
+
+        pygame.draw.line(screen,self.currentColor,self.p0.p,self.pf.p,self.width)
         

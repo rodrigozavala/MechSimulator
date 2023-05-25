@@ -1,4 +1,4 @@
-from UIElements import SimpleLinkGR, JointGR
+from UIElements import SimpleLinkGR, JointGR, TransJointGR
 from geometric_objects import Line, Point
 import math
 
@@ -116,7 +116,96 @@ class SimpleLink:
         return False
         
 
+class TJoint:
+    def __init__(self,x0=None,y0=None,xf=None,yf=None,d=None,xm=None,ym=None,theta=None,grounded=False):
+        """Please always send x0, y0, xf, yf
+        """
+        self.grounded = grounded
+        self.line = Line(x0,y0,xf,yf,d,xm,ym,theta)
+        self.margin = 5
 
+        self.gR = TransJointGR(self.line.getP0(),self.line.getPf())
+        self.currentState = "Standard"
+
+        
+    
+    def rotateRespectToP0(self,theta):
+        self.line.rotateRespectToP0(theta)
+
+
+    def rotateRespectToPF(self,theta):
+        self.line.rotateRespectToPF(theta)
+
+    
+    def setTheta(self, theta):
+        self.line.setTheta(theta)
+    
+    def setP0(self, p0Prime):
+        self.line.setP0(p0Prime)
+
+    def setPf(self, pfPrime):
+        self.line.setPf(pfPrime)
+
+    def updatepFWithTheta(self, theta):
+        self.line.rotateRespectToP0(theta)
+
+    def updatep0WithTheta(self, theta):
+        self.line.rotateRespectToPF(theta)
+
+    def updateValues(self,p0,theta):
+        self.line.updateValues(p0,theta)
+
+    def draw(self,pygame,screen):
+        self.gR.drawItself(pygame,screen,self.getCurrentState())
+
+    def getCurrentState(self):
+        return self.currentState
+    
+    def setCurrentState(self,currentState):
+        self.currentState=currentState
+
+
+    def updateCurrentState(self,mousePos=None):
+        if(mousePos !=None):
+            if(self.checkMouseHovering(mousePos)):
+                self.currentState="Interaction"
+            else:
+                self.currentState="Standard"
+        else:
+            self.currentState="Standard"
+
+
+    def checkMouseHovering(self,mousePos):
+        theta=self.line.getThetaRadians()
+        p0=self.line.p0
+        pf=self.line.pf
+
+        if(self.line.getThetaDegrees()==90 or self.line.getThetaDegrees()==270
+           or self.line.getThetaDegrees()==-270 or self.line.getThetaDegrees()==-90):
+            ##logic if link is vertical
+            if(mousePos.getX()<=self.margin+p0.getX() and p0.getX()-self.margin<=mousePos.getX()):
+                
+                if(p0.getY()<pf.getY()):
+                    if(mousePos.getY()<=pf.getY()+self.margin and pf.getY()-self.margin<=mousePos.getY()):
+                        return True
+                else:
+                    if(mousePos.getY()<=p0.getY()+self.margin and p0.getY()-self.margin<=mousePos.getY()):
+                        return True
+
+        b=(p0.getY()-math.tan(theta)*p0.getX())
+        m=math.tan(theta)
+        ye=m*mousePos.getX()+b
+
+        if (p0.getX()<=pf.getX()):
+            if (p0.getX()-self.margin<=mousePos.getX() and mousePos.getX()<=pf.getX()+self.margin):
+                if( mousePos.getY()<ye+self.margin and ye-self.margin<mousePos.getY()):
+                    return True
+        else:#p0.getX()>pf.getX()
+            if (pf.getX()-self.margin<=mousePos.getX() and mousePos.getX()<=p0.getX()+self.margin):
+                if(mousePos.getY()<ye+self.margin and ye-self.margin<mousePos.getY()):
+                    return True
+
+        return False
 
 
 class Joint:

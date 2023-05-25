@@ -108,6 +108,13 @@ class Line:
     def setPf(self, pfPrime):
         self.pf = pfPrime
 
+    def getP0(self):
+        return self.p0
+
+
+    def getPf(self):
+        return self.pf
+
     def updatepFWithTheta(self, theta):
         self.rotateRespectToP0(theta)
 

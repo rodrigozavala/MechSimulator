@@ -4,7 +4,7 @@ import numpy as np
 import sympy as sym
 import math
 import matplotlib.pyplot as plt
-from links import SimpleLink, Joint
+from links import SimpleLink, Joint, TJoint
 from geometric_objects import Point
 from UIElements import UIButton, UIVariables, UIInputTextBar, Cursor
 from EventLogic import EventManager, CreationModeLogic
@@ -84,11 +84,19 @@ user_text=""
 
 
 clock=pygame.time.Clock()
-    
+
+##Looks for an image
+
+#imgJoint = pygame.transform.scale(pygame.image.load("Images/1dJoint.png").convert_alpha(),(20,10))
+
+
+#imgJoint=pygame.transform.rotate(imgJoint,90)
 
 myEvents=EventManager(UIElementsDict,objectsInScreen)
 cml=CreationModeLogic(UIFontsDict,UIElementsDict)
-
+myJoint=TJoint(100,100,300,400)
+print(myJoint.gR.points)
+print(f"length is : {myJoint.gR.lineLength}")
 while True:
     time_delta=clock.tick(60)/1000.0
     
@@ -102,6 +110,7 @@ while True:
 
     #To fill screen background color
     screen.fill(Color.LIGHT_GRAY.colorCode)
+    #screen.blit(imgJoint,(100,200))
     #To put UI on screen
     myCursor.draw(myEvents.mousePos.getX(),myEvents.mousePos.getY())
 
@@ -127,11 +136,13 @@ while True:
         
     #######################Animation to show all links
 
-    myJoint=Joint(300,300)
-    myJoint.currentState="Warning"
+    #myJoint=Joint(300,300)
+    #myJoint.currentState="Warning"
+    
     for link in myEvents.objectsInScreen:
         link.draw(pygame,screen)
 
+    #myJoint.draw(pygame,screen)
     myJoint.draw(pygame,screen)
     #############################Update screen
     ##This let me show a blue and a red axis
