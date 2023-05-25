@@ -94,7 +94,7 @@ clock=pygame.time.Clock()
 
 myEvents=EventManager(UIElementsDict,objectsInScreen)
 cml=CreationModeLogic(UIFontsDict,UIElementsDict)
-myJoint=TJoint(100,100,300,400)
+myJoint=TJoint(200,200,450,350)
 print(myJoint.gR.points)
 print(f"length is : {myJoint.gR.lineLength}")
 while True:

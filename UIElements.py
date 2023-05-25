@@ -220,9 +220,9 @@ class TransJointGR(GraphicalRepresentation):
         if(thetaAngle==90 or thetaAngle==270 or thetaAngle== -90 or thetaAngle== -270):
             self.points=[[self.p0.getX(),self.p0.getY()+i*self.lineLength/self.numberUnits] for i in range(1,self.numberUnits+1)]
         else:
-            b=(p0.getY()-math.tan(theta)*p0.getX())
+            #b=(p0.getY()-math.tan(theta)*p0.getX())
             m=math.tan(theta)
-            self.points=[np.array([1,m])*i*self.lineLength*math.cos(theta)/(self.numberUnits)+np.array([0+self.p0.getX(),b+self.p0.getY()]) for i in range(1,self.numberUnits+1)]
+            self.points=[np.array([1,m])*i*self.lineLength*math.cos(theta)/(self.numberUnits)+np.array([self.p0.getX(),self.p0.getY()]) for i in range(0,self.numberUnits)]
         
         
         
